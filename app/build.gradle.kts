@@ -50,6 +50,9 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.material)
+    implementation(libs.cloudinary.android)
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
