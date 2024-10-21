@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="padding_small">12dp</dimen>
+    <dimen name="padding_medium">24dp</dimen>
+    <dimen name="padding_large">48dp</dimen>
+</resources>
