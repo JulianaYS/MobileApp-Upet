@@ -28,6 +28,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import pe.edu.upc.upet.ui.screens.petowner.OwnerHome
+import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerEditProfile
+import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerProfile
 import pe.edu.upc.upet.ui.screens.shared.auth.aditionalInformation.PostRegisterScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.ConfirmCodeScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.NewPasswordScreen
@@ -121,6 +124,24 @@ fun Navigation() {
             composable(Routes.SendEmail.route) {
                 shouldShowBottomBar.value = false
                 SendEmailScreen(navController)
+            }
+
+
+            // Owner routes -----------------------------------------------
+
+            composable(Routes.OwnerHome.route) {
+                role.value = TokenManager.getUserIdAndRoleFromToken()?.second ?: ""
+                shouldShowBottomBar.value = true
+                OwnerHome(navController)
+            }
+
+            composable(Routes.OwnerProfile.route) {
+                shouldShowBottomBar.value = true
+                OwnerProfile(navController)
+            }
+            composable(Routes.OwnerEditProfile.route) {
+                shouldShowBottomBar.value = true
+                OwnerEditProfile(navController)
             }
 
 
