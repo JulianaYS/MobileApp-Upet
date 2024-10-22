@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import pe.edu.upc.upet.feature_petOwner.data.repository.PetOwnerRepository
 import pe.edu.upc.upet.feature_petOwner.domain.PetOwner
+import pe.edu.upc.upet.feature_vet.data.repository.VetRepository
+import pe.edu.upc.upet.feature_vet.domain.Vet
 import pe.edu.upc.upet.utils.TokenManager
 
 @Composable
@@ -24,7 +26,20 @@ fun getOwner(): PetOwner? {
     return owner.value
 }
 
-// falta get vet
+@Composable
+fun getVet(): Vet? {
+    val (id, _, _) = TokenManager.getUserIdAndRoleFromToken() ?: return null
+    val vet = remember {
+        mutableStateOf<Vet?>(null)
+    }
+
+    LaunchedEffect(id) {
+        VetRepository().getVetById(id) { fetchedVet ->
+            vet.value = fetchedVet
+        }
+    }
+    return vet.value
+}
 
 fun getRole(): String? {
     val role = TokenManager.getUserIdAndRoleFromToken()?.second

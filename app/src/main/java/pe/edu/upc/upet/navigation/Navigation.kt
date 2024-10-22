@@ -37,6 +37,8 @@ import pe.edu.upc.upet.ui.screens.shared.auth.recovery.NewPasswordScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.SendEmailScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signin.SignInScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signup.SignUpScreen
+import pe.edu.upc.upet.ui.screens.vet.VetHome
+import pe.edu.upc.upet.ui.screens.vet.VetProfile
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.utils.TokenManager
 
@@ -144,6 +146,18 @@ fun Navigation() {
                 OwnerEditProfile(navController)
             }
 
+
+            // Vet routes ---------------------------------------------------------------------------------
+            composable(Routes.VetHome.route) {
+                role.value = TokenManager.getUserIdAndRoleFromToken()?.second ?: ""
+
+                shouldShowBottomBar.value = true
+                VetHome(navController)
+            }
+            composable(Routes.VetProfile.route) {
+                shouldShowBottomBar.value = true
+                VetProfile(navController)
+            }
 
         }
 
