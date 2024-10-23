@@ -51,6 +51,7 @@ import pe.edu.upc.upet.ui.screens.shared.auth.recovery.SendEmailScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signin.SignInScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signup.SignUpScreen
 import pe.edu.upc.upet.ui.screens.shared.medicalHistory.PetMedicalInformation
+import pe.edu.upc.upet.ui.screens.shared.notification.CreateNotification
 import pe.edu.upc.upet.ui.screens.vet.GeneratePassword
 import pe.edu.upc.upet.ui.screens.vet.VetAppointmentDetail
 import pe.edu.upc.upet.ui.screens.vet.VetAppointments
@@ -262,6 +263,12 @@ fun Navigation() {
                     VetReviews(navController, vetId.toInt(), showFAB)
                 }
             }
+
+            composable(Routes.CreateNotification.route){
+                shouldShowBottomBar.value = true
+                CreateNotification(navController)
+            }
+
 
 
             // Vet routes ---------------------------------------------------------------------------------
