@@ -81,4 +81,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.maps.android:maps-compose:4.4.1")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
 }

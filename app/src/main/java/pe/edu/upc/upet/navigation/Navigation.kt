@@ -28,7 +28,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.OwnerClinicDetails
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.OwnerClinicList
 import pe.edu.upc.upet.ui.screens.petowner.OwnerHome
+import pe.edu.upc.upet.ui.screens.petowner.OwnerVetProfile
 import pe.edu.upc.upet.ui.screens.petowner.pet.EditPetDetail
 import pe.edu.upc.upet.ui.screens.petowner.pet.PetDetail
 import pe.edu.upc.upet.ui.screens.petowner.pet.PetList
@@ -41,6 +44,7 @@ import pe.edu.upc.upet.ui.screens.shared.auth.recovery.NewPasswordScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.SendEmailScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signin.SignInScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signup.SignUpScreen
+import pe.edu.upc.upet.ui.screens.vet.GeneratePassword
 import pe.edu.upc.upet.ui.screens.vet.VetHome
 import pe.edu.upc.upet.ui.screens.vet.VetProfile
 import pe.edu.upc.upet.ui.theme.Pink
@@ -172,6 +176,25 @@ fun Navigation() {
                 RegisterPet(navController)
             }
 
+            composable(Routes.OwnerClinicDetails.route) { backStackEntry ->
+                shouldShowBottomBar.value = true
+                val clinicId = backStackEntry.arguments?.getString("clinicId")
+                if (clinicId != null) {
+                    OwnerClinicDetails(navController, clinicId.toInt())
+                }
+            }
+            composable(Routes.OwnerClinicList.route) {
+                shouldShowBottomBar.value = true
+                OwnerClinicList(navController)
+            }
+            composable(Routes.OwnerVetProfile.route){backStackEntry ->
+                shouldShowBottomBar.value = true
+                val vetId = backStackEntry.arguments?.getString("vetId")?.toInt()
+                vetId?.let{id->
+                    OwnerVetProfile(id, navController)
+                }
+            }
+
 
             // Vet routes ---------------------------------------------------------------------------------
             composable(Routes.VetHome.route) {
@@ -183,6 +206,14 @@ fun Navigation() {
             composable(Routes.VetProfile.route) {
                 shouldShowBottomBar.value = true
                 VetProfile(navController)
+            }
+
+            composable(Routes.GeneratePassword.route){
+                shouldShowBottomBar.value = true
+                val clinicId = it.arguments?.getString("clinicId")
+                if (clinicId != null) {
+                    GeneratePassword(navController, clinicId.toInt())
+                }
             }
         }
     }
