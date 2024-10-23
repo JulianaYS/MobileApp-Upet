@@ -29,6 +29,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import pe.edu.upc.upet.ui.screens.petowner.OwnerHome
+import pe.edu.upc.upet.ui.screens.petowner.pet.EditPetDetail
+import pe.edu.upc.upet.ui.screens.petowner.pet.PetDetail
+import pe.edu.upc.upet.ui.screens.petowner.pet.PetList
+import pe.edu.upc.upet.ui.screens.petowner.pet.RegisterPet
 import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerEditProfile
 import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerProfile
 import pe.edu.upc.upet.ui.screens.shared.auth.aditionalInformation.PostRegisterScreen
@@ -145,6 +149,28 @@ fun Navigation() {
                 shouldShowBottomBar.value = true
                 OwnerEditProfile(navController)
             }
+            composable(Routes.PetDetails.route) { backStackEntry ->
+                shouldShowBottomBar.value = true
+                val petId = backStackEntry.arguments?.getString("petId")
+                if (petId != null) {
+                    PetDetail(navController, petId.toInt())
+                }
+            }
+            composable(Routes.EditPetDetail.route) { backStackEntry ->
+                shouldShowBottomBar.value = true
+                val petId = backStackEntry.arguments?.getString("petId")
+                if (petId != null) {
+                    EditPetDetail(navController, petId.toInt())
+                }
+            }
+            composable(Routes.PetList.route) {
+                shouldShowBottomBar.value = true
+                PetList(navController)
+            }
+            composable(Routes.RegisterPet.route) {
+                shouldShowBottomBar.value = true
+                RegisterPet(navController)
+            }
 
 
             // Vet routes ---------------------------------------------------------------------------------
@@ -158,8 +184,6 @@ fun Navigation() {
                 shouldShowBottomBar.value = true
                 VetProfile(navController)
             }
-
         }
-
     }
 }
