@@ -48,10 +48,12 @@ import pe.edu.upc.upet.ui.screens.shared.auth.recovery.NewPasswordScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.SendEmailScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signin.SignInScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signup.SignUpScreen
+import pe.edu.upc.upet.ui.screens.shared.medicalHistory.PetMedicalInformation
 import pe.edu.upc.upet.ui.screens.vet.GeneratePassword
 import pe.edu.upc.upet.ui.screens.vet.VetAppointmentDetail
 import pe.edu.upc.upet.ui.screens.vet.VetAppointments
 import pe.edu.upc.upet.ui.screens.vet.VetHome
+import pe.edu.upc.upet.ui.screens.vet.VetMedicalHistory
 import pe.edu.upc.upet.ui.screens.vet.VetProfile
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.utils.TokenManager
@@ -232,6 +234,14 @@ fun Navigation() {
                     )
                 }
             }
+            composable(Routes.petMedicalHistory.route){
+                shouldShowBottomBar.value = true
+                val petId = it.arguments?.getString("petId")
+                if (petId != null) {
+                    Log.d("Navigation", Routes.petMedicalHistory.route)
+                    PetMedicalInformation(navController, petId.toInt())
+                }
+            }
 
 
             // Vet routes ---------------------------------------------------------------------------------
@@ -265,6 +275,15 @@ fun Navigation() {
                 shouldShowBottomBar.value = true
                 VetAppointments(navController)
             }
+            composable(Routes.AddReport.route){
+                shouldShowBottomBar.value = true
+                Log.d("Navigation", Routes.AddReport.route)
+                val petId = it.arguments?.getString("petId")
+                if (petId != null) {
+                    VetMedicalHistory(navController, petId.toInt())
+                }
+            }
+
         }
     }
 }
