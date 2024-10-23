@@ -32,6 +32,10 @@ import pe.edu.upc.upet.ui.screens.petowner.vetclinic.OwnerClinicDetails
 import pe.edu.upc.upet.ui.screens.petowner.vetclinic.OwnerClinicList
 import pe.edu.upc.upet.ui.screens.petowner.OwnerHome
 import pe.edu.upc.upet.ui.screens.petowner.OwnerVetProfile
+import pe.edu.upc.upet.ui.screens.petowner.appointment.AppointmentDetail
+import pe.edu.upc.upet.ui.screens.petowner.appointment.AppointmentList
+import pe.edu.upc.upet.ui.screens.petowner.appointment.BookAppointment
+import pe.edu.upc.upet.ui.screens.petowner.appointment.PetDetailsAppointment
 import pe.edu.upc.upet.ui.screens.petowner.pet.EditPetDetail
 import pe.edu.upc.upet.ui.screens.petowner.pet.PetDetail
 import pe.edu.upc.upet.ui.screens.petowner.pet.PetList
@@ -45,6 +49,8 @@ import pe.edu.upc.upet.ui.screens.shared.auth.recovery.SendEmailScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signin.SignInScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.signup.SignUpScreen
 import pe.edu.upc.upet.ui.screens.vet.GeneratePassword
+import pe.edu.upc.upet.ui.screens.vet.VetAppointmentDetail
+import pe.edu.upc.upet.ui.screens.vet.VetAppointments
 import pe.edu.upc.upet.ui.screens.vet.VetHome
 import pe.edu.upc.upet.ui.screens.vet.VetProfile
 import pe.edu.upc.upet.ui.theme.Pink
@@ -195,6 +201,38 @@ fun Navigation() {
                 }
             }
 
+            composable(Routes.AppointmentDetail.route) { backStackEntry ->
+                shouldShowBottomBar.value = true
+                val appointmentId = backStackEntry.arguments?.getString("appointmentId")
+                if (appointmentId != null) {
+                    AppointmentDetail(navController, appointmentId.toInt())
+                }
+            }
+            composable(Routes.AppointmentList.route) {
+                shouldShowBottomBar.value = true
+                AppointmentList(navController)
+            }
+            composable(Routes.BookAppointment.route) {
+                shouldShowBottomBar.value = true
+                val vetId = it.arguments?.getString("vetId")
+                if (vetId != null) {
+                    BookAppointment(navController, vetId.toInt())
+                }
+            }
+            composable(Routes.PetDetailsAppointment.route) {
+                shouldShowBottomBar.value = true
+                val vetId = it.arguments?.getString("vetId")
+                val selectedDate = it.arguments?.getString("selectedDate")
+                val selectedTime = it.arguments?.getString("selectedTime")
+                if (vetId != null && selectedDate != null && selectedTime != null) {
+                    PetDetailsAppointment(
+                        navController,
+                        vetId.toInt(),
+                        selectedDate, selectedTime
+                    )
+                }
+            }
+
 
             // Vet routes ---------------------------------------------------------------------------------
             composable(Routes.VetHome.route) {
@@ -214,6 +252,18 @@ fun Navigation() {
                 if (clinicId != null) {
                     GeneratePassword(navController, clinicId.toInt())
                 }
+            }
+
+            composable(Routes.VetAppointmentDetail.route) { backStackEntry ->
+                shouldShowBottomBar.value = true
+                val appointmentId = backStackEntry.arguments?.getString("appointmentId")
+                if (appointmentId != null) {
+                    VetAppointmentDetail(navController, appointmentId.toInt())
+                }
+            }
+            composable(Routes.VetAppointments.route) {
+                shouldShowBottomBar.value = true
+                VetAppointments(navController)
             }
         }
     }
