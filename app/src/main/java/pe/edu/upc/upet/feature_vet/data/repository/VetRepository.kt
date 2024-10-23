@@ -2,6 +2,8 @@ package pe.edu.upc.upet.feature_vet.data.repository
 
 import android.util.Log
 import pe.edu.upc.upet.feature_auth.data.remote.SignInResponse
+import pe.edu.upc.upet.feature_review.data.remote.ReviewResponse
+import pe.edu.upc.upet.feature_review.data.remote.VetResponseWithReviews
 import pe.edu.upc.upet.feature_vet.data.mapper.toDomainModel
 import pe.edu.upc.upet.feature_vet.data.remote.AvailableTimesRequest
 import pe.edu.upc.upet.feature_vet.data.remote.AvailableTimesResponse
@@ -59,7 +61,7 @@ class VetRepository (
             }
         })
     }
-/*
+
     fun getVetReviews(vetId: Int, onSuccess : (List<ReviewResponse>) -> Unit, onError: () -> Unit){
         vetService.getVetReviews(vetId).enqueue(object : Callback<VetResponseWithReviews> {
             override fun onResponse(
@@ -83,7 +85,7 @@ class VetRepository (
                 onError()
             }
         })
-    }*/
+    }
 
     fun createVet(userId: Int, vetData: VetRequest, callback: (Boolean) -> Unit){
         vetService.createVet(userId, vetData).enqueue(object : Callback<SignInResponse> {

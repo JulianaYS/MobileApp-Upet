@@ -42,6 +42,8 @@ import pe.edu.upc.upet.ui.screens.petowner.pet.PetList
 import pe.edu.upc.upet.ui.screens.petowner.pet.RegisterPet
 import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerEditProfile
 import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerProfile
+import pe.edu.upc.upet.ui.screens.petowner.review.AddReview
+import pe.edu.upc.upet.ui.screens.petowner.review.VetReviews
 import pe.edu.upc.upet.ui.screens.shared.auth.aditionalInformation.PostRegisterScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.ConfirmCodeScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.NewPasswordScreen
@@ -55,6 +57,7 @@ import pe.edu.upc.upet.ui.screens.vet.VetAppointments
 import pe.edu.upc.upet.ui.screens.vet.VetHome
 import pe.edu.upc.upet.ui.screens.vet.VetMedicalHistory
 import pe.edu.upc.upet.ui.screens.vet.VetProfile
+import pe.edu.upc.upet.ui.screens.vet.VetReviewProfile
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.utils.TokenManager
 
@@ -243,6 +246,23 @@ fun Navigation() {
                 }
             }
 
+            composable(Routes.AddReview.route) {
+                    backStackEntry ->
+                shouldShowBottomBar.value = true
+                val vetId = backStackEntry.arguments?.getString("vetId")
+                if (vetId != null) {
+                    AddReview(navController, vetId.toInt())
+                }
+            }
+            composable(Routes.VetReviews.route) { backStackEntry ->
+                shouldShowBottomBar.value = true
+                val vetId = backStackEntry.arguments?.getString("vetId")
+                val showFAB = backStackEntry.arguments?.getString("showFAB")?.toBoolean() ?: true
+                if (vetId != null) {
+                    VetReviews(navController, vetId.toInt(), showFAB)
+                }
+            }
+
 
             // Vet routes ---------------------------------------------------------------------------------
             composable(Routes.VetHome.route) {
@@ -283,6 +303,11 @@ fun Navigation() {
                     VetMedicalHistory(navController, petId.toInt())
                 }
             }
+            composable(Routes.VetPatients.route) {
+                shouldShowBottomBar.value = true
+                VetReviewProfile(navController)
+            }
+
 
         }
     }
