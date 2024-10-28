@@ -48,7 +48,9 @@ import pe.edu.upc.upet.feature_vet.domain.Vet
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.screens.petowner.getOwner
 import pe.edu.upc.upet.ui.screens.petowner.isOwnerAuthenticated
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.capitalizeFirstLetter
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.poppinsFamily
 import java.time.LocalDate
@@ -82,7 +84,7 @@ fun AppointmentList(navController: NavController) {
 
     Scaffold(
         topBar = { TopBar(navController = navController, title = "My Appointments") },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             AppointmentFilterButtons(
@@ -105,7 +107,7 @@ fun AppointmentFilterButtons(
 
     Row(modifier = Modifier
         .fillMaxWidth()
-        .padding(10.dp),
+        .padding(BorderPadding),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Button(
@@ -157,12 +159,13 @@ fun AppointmentCard(appointment: Appointment, navController: NavController) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier
             .fillMaxWidth()
+            .padding(start = BorderPadding, end = BorderPadding)
             .clickable { navController.navigate(Routes.AppointmentDetail.createRoute(appointment.id)) },
     ) {
         AppointmentCardInfo(appointment)
         //DividerAndButtons()
     }
-    Spacer(modifier = Modifier.height(20.dp))
+    Spacer(modifier = Modifier.height(15.dp))
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -187,31 +190,37 @@ fun AppointmentCardInfo(appointment: Appointment) {
     val appointmentDate = LocalDate.parse(appointment.day, formatter)
     val today = LocalDate.now()
 
-
-
     vet?: return
     pet?: return
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(6.dp)
-    ) {
-        ImageCircle(imageUrl = vet!!.imageUrl)
-        AppointmentCardDetails(vet!!.name, pet!!.name, appointment.status, appointment.startTime, appointment.endTime, appointment.day)
+    Card (
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF0F6FF),
+        ),
+    ){
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp)
+        ) {
+            ImageCircle(imageUrl = vet!!.imageUrl)
+            AppointmentCardDetails(vet!!.name, pet!!.name, appointment.status, appointment.startTime, appointment.endTime, appointment.day)
+        }
     }
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppointmentCardDetails(name: String, petName: String, statusText: String, startTime: String, endTime: String, day: String) {
-
     Column(
-        modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = name,
+            text = capitalizeFirstLetter(name),
             style = TextStyle(
                 color = Color.Black,
                 fontSize = 18.sp,
@@ -227,7 +236,13 @@ fun AppointmentCardDetails(name: String, petName: String, statusText: String, st
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text =  if (isOwnerAuthenticated()) {"Pet: $petName"} else {"Vet: $petName"},
+                    text = if (isOwnerAuthenticated()) {
+                        "Vet: ${capitalizeFirstLetter(petName)}"
+                    } else {
+                        "Pet: ${
+                            capitalizeFirstLetter(petName)
+                        }"
+                    },
                     color = Pink,
                     style = TextStyle(fontSize = 16.sp)
                 )

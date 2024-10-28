@@ -55,7 +55,6 @@ fun VetEditProfile(navController: NavHostController) {
         topBar = {
             TopBar(navController = navController, title = "Edit Profile")
         },
-        modifier = Modifier.padding(16.dp)
     ) { paddingValues ->
         LazyColumn(
             contentPadding = paddingValues,

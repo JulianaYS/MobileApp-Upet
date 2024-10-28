@@ -48,6 +48,7 @@ import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.TextSubtitle2
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -93,7 +94,7 @@ fun BookAppointment(navController: NavController, vetId: Int) {
 
     Scaffold(topBar = {
         TopBar(navController = navController, title = "Book Appointment")
-    }, modifier = Modifier.padding(16.dp)) { paddingValues ->
+    }, modifier = Modifier) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn {
                 item {
@@ -109,7 +110,7 @@ fun BookAppointment(navController: NavController, vetId: Int) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0x31E0E0E0), RoundedCornerShape(15.dp))
+                                .background(Color(0xA9F1DADC), RoundedCornerShape(15.dp))
                                 .padding(8.dp)
                         ) {
                             Column {
@@ -172,7 +173,7 @@ fun MonthPicker(currentYearMonth: YearMonth, onYearMonthChange: (YearMonth) -> U
         Text(
             text = currentYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
             fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
 
         IconButton(onClick = {
@@ -219,11 +220,11 @@ fun CalendarView(currentYearMonth: YearMonth, selectedDate: LocalDate, onDateSel
                                 .padding(4.dp)
                                 .border(
                                     width = 2.dp,
-                                    color = if (date == today) Color.White else Color.Transparent,
+                                    color = if (date == today) Blue1 else Color.Transparent,
                                     shape = CircleShape,
                                 )
                                 .background(
-                                    if (selectedDate == date) Color.White else Color.Transparent,
+                                    if (selectedDate == date) Blue1 else Color.Transparent,
                                     RoundedCornerShape(50)
                                 )
                                 .clickable {
@@ -233,8 +234,8 @@ fun CalendarView(currentYearMonth: YearMonth, selectedDate: LocalDate, onDateSel
                             Text(
                                 text = dayOfMonth.toString(),
                                 color = when {
-                                    selectedDate == date -> Color.Black
-                                    else -> Color.White
+                                    selectedDate == date -> Color.White
+                                    else -> Color.Gray
                                 },
                                 modifier = Modifier.align(Alignment.Center),
                                 textAlign = TextAlign.Center

@@ -21,18 +21,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TagFaces
 import androidx.compose.material.icons.outlined.Balance
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material.icons.outlined.TagFaces
+import androidx.compose.material.icons.outlined.Thermostat
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -58,17 +63,20 @@ import pe.edu.upc.upet.feature_pet.data.remote.GenderEnum
 import pe.edu.upc.upet.feature_pet.data.repository.PetRepository
 import pe.edu.upc.upet.feature_pet.domain.Pet
 import pe.edu.upc.upet.navigation.Routes
+import pe.edu.upc.upet.ui.screens.petowner.isOwnerAuthenticated
 import pe.edu.upc.upet.ui.shared.CustomButton
-import pe.edu.upc.upet.ui.shared.CustomReturnButton
-import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.shared.CustomButton2
 import pe.edu.upc.upet.ui.theme.Blue1
-import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.poppinsFamily
 
 @Composable
 fun PetDetail(navController: NavHostController, petId: Int) {
     var pet by remember { mutableStateOf<Pet?>(null) }
+    var isTracking by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    var iconImage by remember { mutableStateOf(Icons.Filled.TagFaces) }
+    var iconColor by remember { mutableStateOf(Color.Red) }
 
     PetRepository().getPetById(petId){
         pet = it
@@ -98,7 +106,7 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                         .padding(paddingValues)
                         .fillMaxWidth()
                         .fillMaxSize()
-                        .background(Blue1),
+                        .background(Color(0xFFF0F6FF)),
                     verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
                     /*Row (modifier = Modifier.fillMaxWidth(),
@@ -133,10 +141,11 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                             .clip(shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                             .background(Color.White)
                     ){
-                        Column (modifier = Modifier.padding(15.dp, 15.dp)){
-                            Row (modifier = Modifier.fillMaxWidth(),
+                        Column (modifier = Modifier.padding(15.dp, 15.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
-                            ){
+                            ) {
                                 Text(
                                     text = "General Information",
                                     fontWeight = FontWeight.SemiBold,
@@ -147,11 +156,12 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 )
                                 IconButton(
                                     modifier = Modifier.align(Alignment.CenterVertically),
-                                    onClick = { }) {
+                                    onClick = { }
+                                ) {
                                     Icon(
-                                        Icons.Filled.TagFaces,
+                                        imageVector = iconImage,
                                         "TagFaces",
-                                        tint = Color.Black
+                                        tint = iconColor
                                     )
                                 }
                             }
@@ -162,6 +172,9 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 }
                             }
 
+                            IoTInformationCard(title = "Heart Rate", icon = Icons.Outlined.Favorite, content = "75 bpm")
+                            IoTInformationCard(title = "Temperature", icon = Icons.Outlined.Thermostat, content = "37.5 °C")
+
                             Text(
                                 text = "More details",
                                 fontWeight = FontWeight.SemiBold,
@@ -171,21 +184,112 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                     .padding(top =10.dp, bottom = 10.dp)
                             )
 
-                            CustomButton(text = "Add Medical Information") {
-                                navController.navigate(Routes.AddReport.createRoute( petValue.id))
-                            }
-                            CustomButton(text = "Edit Profile") {
-                                navController.navigate(Routes.EditPetDetail.createRoute(petValue.id))
+                            if (isOwnerAuthenticated()) {
+                                CustomButton(text = "Add Medical Information") {
+                                    navController.navigate(Routes.AddReport.createRoute(petValue.id))
+                                }
+                                CustomButton(text = "Edit Profile") {
+                                    navController.navigate(Routes.EditPetDetail.createRoute(petValue.id))
+                                }
+                            } else {
+                                CustomButton2(
+                                    text = if (isTracking) "Stop tracking" else "Start tracking",
+                                    onClick = {
+                                    if (isTracking) {
+                                        isTracking = false
+                                        iconColor = Color.Red
+                                        iconImage = Icons.Filled.TagFaces
+                                    } else {
+                                        showDialog = true
+                                    }
+                                })
+                                if (showDialog) {
+                                    TrackingDialog(
+                                        onDismiss = { showDialog = false },
+                                        onAccept = {
+                                            isTracking = true
+                                            showDialog = false
+                                            iconColor = Color(0xFF09D809)
+                                            iconImage = Icons.Outlined.TagFaces
+                                        }
+                                    )
+                                }
                             }
                             CustomButton(text = "Medical History") {
                                 navController.navigate(Routes.petMedicalHistory.createRoute(petValue.id))
                             }
-                            //}
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TrackingDialog(onDismiss: () -> Unit, onAccept: () -> Unit) {
+    var code by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Enter the product code") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = code,
+                    onValueChange = { code = it },
+                    label = { Text("Code") }
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onAccept) {
+                Text("Accept")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun IoTInformationCard(title: String, icon: ImageVector, content: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .width(180.dp)
+            .height(100.dp)
+            .padding(6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+            contentColor = Color(0xFF0A2540)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Icon(icon, contentDescription = "IoT Icon", tint = Color(0xFF0A2540))
+        }
+        Text(
+            text = content,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .align(Alignment.CenterHorizontally),
+        )
     }
 }
 

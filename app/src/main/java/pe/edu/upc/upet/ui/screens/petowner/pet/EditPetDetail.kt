@@ -79,7 +79,7 @@ fun EditPetDetail(navController: NavController, petId: Int) {
         topBar = {
             TopBar(navController = navController, title = "Edit Pet Details")
         },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
     ) { paddingValues ->
         LazyColumn(
             contentPadding = paddingValues,

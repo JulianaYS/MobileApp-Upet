@@ -1,11 +1,14 @@
 package pe.edu.upc.upet.ui.screens.petowner.review
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +33,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -37,13 +41,16 @@ import pe.edu.upc.upet.feature_review.data.remote.ReviewResponse
 import pe.edu.upc.upet.feature_vet.data.repository.VetRepository
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.screens.petowner.ProfileImage
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.capitalizeFirstLetter
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.poppinsFamily
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun VetReviews(navController: NavController, vetId: Int, showFAB: Boolean = true) {
-
     val vetRepository = remember { VetRepository() }
     val reviewList = remember {
         mutableStateOf<List<ReviewResponse>>(emptyList())
@@ -63,14 +70,14 @@ fun VetReviews(navController: NavController, vetId: Int, showFAB: Boolean = true
         topBar = {
             TopBar(navController = navController, title = "Reviews")
         },
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier,
         floatingActionButton = {
             if(showFAB){
                 FloatingActionButton(
                     onClick = {
                         navController.navigate(Routes.AddReview.createRoute(vetId))
                     },
-                    contentColor = Color(0xFF000000),
+                    contentColor = Color.White,
                     containerColor = Pink,
                 ) {
                     Icon(imageVector = Icons.Default.Add,
@@ -79,7 +86,7 @@ fun VetReviews(navController: NavController, vetId: Int, showFAB: Boolean = true
             }
         }
     ){
-            paddingValues->
+        paddingValues->
         LazyColumn(modifier = Modifier
             .padding(paddingValues)
             .background(Color.Transparent)) {
@@ -93,7 +100,7 @@ fun VetReviews(navController: NavController, vetId: Int, showFAB: Boolean = true
 @Composable
 fun ReviewCard(review: ReviewResponse){
     Card(modifier = Modifier
-        .padding(10.dp)
+        .padding(BorderPadding)
         .shadow(elevation = 8.dp, shape = RoundedCornerShape(10.dp)),
         colors = CardDefaults.cardColors(
             containerColor = Color.White)
@@ -110,7 +117,7 @@ fun ReviewCard(review: ReviewResponse){
                     ProfileImage(url = review.image_url, 42,40)
                 }
                 Text(
-                    text = review.pet_owner_name,
+                    text = capitalizeFirstLetter(review.pet_owner_name),
                     style = TextStyle(
                         color = Color.Gray,
                         fontSize = 15.sp,
@@ -123,13 +130,31 @@ fun ReviewCard(review: ReviewResponse){
                 )
                 Column {
                     Row (modifier = Modifier.padding(start= 120.dp)){
-                        Icon(imageVector = Icons.Default.Star, contentDescription = "Estrella", tint = Color(0xFFFFB800))
-                        Text(text = review.stars.toString())
+                        Icon(imageVector = Icons.Default.Star,
+                            contentDescription = "Estrella",
+                            tint = Color(0xFFFFB800))
+                        Text(text = review.stars.toString(),color = Color.Gray,
+                            modifier = Modifier.padding(start = 5.dp))
                     }
-                    Text(text = review.review_time)
+                    Row(modifier = Modifier.padding(start = 100.dp)){
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                            Text(text = formatTimeTo12Hour(review.review_time), color = Color.Gray,
+                            )
+
+                        }
+                    }
                 }
             }
-            Text(text = review.description,color = Color.Gray,modifier = Modifier.width(300.dp))
+            Text(text = review.description,
+                modifier = Modifier.width(300.dp))
         }
     }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun formatTimeTo12Hour(time: String): String {
+    val dateTime = LocalDateTime.parse(time)
+    val formatter = DateTimeFormatter.ofPattern("h:mm a")
+    return dateTime.format(formatter)
 }

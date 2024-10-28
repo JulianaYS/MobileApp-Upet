@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,10 +39,14 @@ import androidx.navigation.NavHostController
 import pe.edu.upc.upet.feature_petOwner.data.remote.SubscriptionType
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.screens.petowner.getOwner
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.capitalizeFirstLetter
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.getStreetNameFromCoordinates
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.ImagePicker
 import pe.edu.upc.upet.ui.shared.SuccessDialog
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.Blue1
+import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.utils.TokenManager
 
 @Composable
@@ -50,23 +56,24 @@ fun OwnerProfile(navController: NavHostController) {
 
     Scaffold(
         topBar = { TopBar(navController = navController, title = "My Profile") },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(start = BorderPadding, end = BorderPadding)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(30.dp)
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
+            Spacer(modifier = Modifier.height(10.dp))
 
             ProfileHeader(petOwner.id, petOwner.imageUrl)
             UserInfo(petOwner.name, userEmail,
                 listOf(
                     InfoRowData(Icons.Default.Person4, "Phone", petOwner.numberPhone),
-                    InfoRowData(Icons.Default.Home, "Address", petOwner.location)
+                    InfoRowData(Icons.Default.Home, "Address", getStreetNameFromCoordinates(location = petOwner.location))
                 )
             )
             val subscriptionRoute = if (petOwner.subscriptionType == SubscriptionType.BASIC) {
@@ -149,11 +156,11 @@ fun UserInfo(
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = name,
+                text = capitalizeFirstLetter(name),
                 color = Color.Black,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.SemiBold
@@ -188,7 +195,7 @@ fun InfoRow(icon: ImageVector, label: String, value: String?) {
         Icon(
             imageVector = icon,
             contentDescription = "$label Icon",
-            tint = Color(0xFF3F51B5)
+                tint = Blue1
         )
         Text(
             text = "$label: ${value ?: ""

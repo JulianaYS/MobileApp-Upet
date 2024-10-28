@@ -64,7 +64,7 @@ fun TextSubtitle2(text: String) {
         modifier = Modifier.padding(bottom = 15.dp),
         text = text,
         style = TextStyle(
-            color = Color.White,
+            color = Color.Black,
             fontSize = 20.sp,
             fontFamily = poppinsFamily,
             fontWeight = FontWeight.SemiBold

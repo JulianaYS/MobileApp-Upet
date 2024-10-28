@@ -3,6 +3,7 @@ package pe.edu.upc.upet.ui.screens.petowner.vetclinic
 import android.location.Geocoder
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,9 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -46,6 +51,7 @@ import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.shared.TopBar
 import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
@@ -111,43 +117,100 @@ fun SearchField(searchQuery: String, onValueChange: (String) -> Unit) {
 @Composable
 fun VetClinicCard(navController: NavController, veterinaryClinic: VeterinaryClinic) {
     Card(
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
+            containerColor = Color(0xFFF0F6FF),
         ),
         modifier = Modifier
             .fillMaxWidth()
+            .height(120.dp)
             .clickable {
                 navController.navigate(Routes.OwnerClinicDetails.createRoute(veterinaryClinic.id))
             }
-            .padding(BorderPadding)
+            .padding(start = BorderPadding, end = BorderPadding)
     ) {
-        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier
+            .padding(10.dp)
+            .fillMaxWidth()
+            .height(120.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start) {
             GlideImage(
                 imageModel = { veterinaryClinic.image_url },
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(20.dp)),
+                    .size(100.dp)
+                    .padding(start = 8.dp)
+                    .clip(RoundedCornerShape(15.dp)),
                 imageOptions = ImageOptions(contentScale = ContentScale.Crop)
             )
             Column(modifier = Modifier.padding(start = 16.dp)) {
                 Text(
-                    text = veterinaryClinic.name,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = capitalizeFirstLetter(veterinaryClinic.name),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                     color = Color.Black
                 )
-                Text(
-                    text = getStreetNameFromCoordinates(location = veterinaryClinic.location),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-                Text(
-                    text = "Operating Hours: ${veterinaryClinic.office_hours_start + " - " + veterinaryClinic.office_hours_end}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
+                Column(modifier = Modifier.padding(top = 7.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Location Icon",
+                            tint = Blue1,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = getStreetNameFromCoordinates(location = veterinaryClinic.location),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = "Schedule Icon",
+                            tint = Blue1,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = " ${formatTime(veterinaryClinic.office_hours_start) + " - " + formatTime(veterinaryClinic.office_hours_end)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+fun formatTime(time: String): String {
+    val inputFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val date = inputFormat.parse(time)
+    return outputFormat.format(date)
+}
+
+fun capitalizeFirstLetter(text: String): String {
+    return text.split(" ").joinToString(" ") { word ->
+        word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    }
+}
+
+@Composable
+fun getStreetNameFromCoordinates2(location: String): String {
+    val context = LocalContext.current
+    val geocoder = remember { Geocoder(context, Locale.getDefault()) }
+    val coordinates = location.split(",")
+    val latitude = coordinates[0].toDouble()
+    val longitude = coordinates[1].toDouble()
+    val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+    return if (!addresses.isNullOrEmpty()) {
+        addresses[0].getAddressLine(0)
+    } else {
+        "Unknown location"
     }
 }
 
@@ -160,7 +223,10 @@ fun getStreetNameFromCoordinates(location: String): String {
     val longitude = coordinates[1].toDouble()
     val addresses = geocoder.getFromLocation(latitude, longitude, 1)
     return if (!addresses.isNullOrEmpty()) {
-        addresses[0].getAddressLine(0)
+        val address = addresses[0]
+        val addressParts = address.getAddressLine(0).split(",")
+        val streetAndDistrict = addressParts.take(2).joinToString(", ")
+        streetAndDistrict.replace(Regex("\\d{5}"), "").trim()
     } else {
         "Unknown location"
     }

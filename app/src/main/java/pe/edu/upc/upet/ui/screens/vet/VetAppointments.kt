@@ -37,6 +37,7 @@ import pe.edu.upc.upet.ui.screens.petowner.appointment.AppointmentFilterButtons
 import pe.edu.upc.upet.ui.screens.petowner.appointment.ImageCircle
 import pe.edu.upc.upet.ui.screens.petowner.getVet
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.BorderPadding
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -63,7 +64,7 @@ fun VetAppointments(navController: NavController) {
 
     Scaffold(
         topBar = { TopBar(navController = navController, title = "My Appointments") },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             AppointmentFilterButtons(
@@ -97,6 +98,7 @@ fun AppointmentCardVet(appointment: Appointment, navController: NavController) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier
             .fillMaxWidth()
+            .padding(start = BorderPadding, end = BorderPadding)
             .clickable { navController.navigate(Routes.AppointmentDetail.createRoute(appointment.id)) },
     ) {
         AppointmentCardInfoVet(appointment)
@@ -126,11 +128,24 @@ fun AppointmentCardInfoVet(appointment: Appointment) {
     vet?: return
     pet?: return
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(6.dp)
+    Card (
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF0F6FF),
+        ),
     ) {
-        ImageCircle(imageUrl = pet!!.image_url)
-        AppointmentCardDetails(pet!!.name, vet!!.name, appointment.status, appointment.startTime, appointment.endTime, appointment.day)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(6.dp)
+        ) {
+            ImageCircle(imageUrl = pet!!.image_url)
+            AppointmentCardDetails(
+                pet!!.name,
+                vet!!.name,
+                appointment.status,
+                appointment.startTime,
+                appointment.endTime,
+                appointment.day
+            )
+        }
     }
 }

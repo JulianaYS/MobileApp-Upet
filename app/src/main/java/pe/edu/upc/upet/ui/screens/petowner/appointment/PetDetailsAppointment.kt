@@ -61,7 +61,6 @@ fun PetDetailsAppointment(navController: NavController, vetId: Int, selectedDate
 
     Column(
         modifier = Modifier
-            .padding()
             .fillMaxSize()
             .padding(top = 10.dp, start = BorderPadding, end = BorderPadding),
         verticalArrangement = Arrangement.SpaceBetween

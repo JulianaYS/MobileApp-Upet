@@ -53,6 +53,7 @@ import pe.edu.upc.upet.ui.shared.LabelTextField
 import pe.edu.upc.upet.ui.shared.RadioButtonsOptions
 import pe.edu.upc.upet.ui.shared.SuccessDialog
 import pe.edu.upc.upet.ui.shared.TextFieldType
+import pe.edu.upc.upet.ui.shared.TopBar
 import pe.edu.upc.upet.ui.shared.uploadImage
 import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
@@ -68,7 +69,11 @@ fun RegisterPet(navController: NavHostController) {
     val (id, _, _) = TokenManager.getUserIdAndRoleFromToken() ?: error("Error obteniendo el userId y userRole desde el token")
     val showSuccessDialog = remember { mutableStateOf(false) }
 
-    Scaffold(modifier = Modifier.padding(16.dp)) { paddingValues ->
+    Scaffold(modifier = Modifier,
+        topBar = {
+            TopBar(navController = navController, title = "Pet Form")
+        }
+    ) { paddingValues ->
         val name = remember { mutableStateOf("") }
         val breed = remember { mutableStateOf("") }
         val weight = remember { mutableStateOf("") }
@@ -89,39 +94,19 @@ fun RegisterPet(navController: NavHostController) {
                     imageUrl.value = uri
                 }
             }
-        Box(modifier = Modifier.fillMaxSize()) {
-
+        Box(modifier = Modifier.fillMaxSize()
+            .background(Color(0xFFF0F6FF))
+            .padding(top = BorderPadding, bottom = BorderPadding)
+        ) {
             LazyColumn {
                 item {
                     Column(
                         modifier = Modifier
                             .padding(paddingValues)
                             .fillMaxSize()
-                            .background(UpetBackGroundPrimary),
+                            ,
                         verticalArrangement = Arrangement.spacedBy(13.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color(0xFF0B1C3F))
-                                .padding(top = 10.dp, start = BorderPadding, end = BorderPadding),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CustomReturnButton(navController = navController)
-                            Text(
-                                text = "Pet Form",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 10.dp, start = 20.dp),
-                                style = TextStyle(
-                                    color = Color.White,
-                                    fontSize = 20.sp,
-                                    fontFamily = poppinsFamily,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                            )
-                        }
-
 
                         PetImageRegister(
                             text = "Upload image",
@@ -251,12 +236,7 @@ fun RegisterPet(navController: NavHostController) {
 @Composable
 fun GenderOption( selectedOption: MutableState<Int> = mutableIntStateOf(1)){
     Column (
-        modifier = Modifier.padding(
-            start = BorderPadding,
-            end = BorderPadding,
-            top = 4.dp,
-            bottom = 4.dp
-        )
+        modifier = Modifier
     ){
         Text(text ="Gender", style = TextStyle(
             color = Color.White,

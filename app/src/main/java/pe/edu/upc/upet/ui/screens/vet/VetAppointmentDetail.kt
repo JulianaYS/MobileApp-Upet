@@ -129,6 +129,8 @@ fun VetAppointmentDetail(navController: NavHostController, appointmentId: Int) {
 
                 OwnerInformation(ownerPet!!, navController)
 
+                Spacer(modifier = Modifier.height(20.dp))
+
                 CustomButton(text = "Add report") {
                     navController.navigate(Routes.AddReport.createRoute( pet!!.id))
                 }

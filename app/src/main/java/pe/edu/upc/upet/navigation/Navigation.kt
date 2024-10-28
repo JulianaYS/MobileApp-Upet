@@ -62,6 +62,7 @@ import pe.edu.upc.upet.ui.screens.vet.VetHome
 import pe.edu.upc.upet.ui.screens.vet.VetMedicalHistory
 import pe.edu.upc.upet.ui.screens.vet.VetProfile
 import pe.edu.upc.upet.ui.screens.vet.VetReviewProfile
+import pe.edu.upc.upet.ui.screens.vet.VetTrackPet
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.utils.TokenManager
 
@@ -78,6 +79,7 @@ val ownerBottomNavItems = listOf(
 val vetBottomNavItems = listOf(
     BottomNavItem("Home", Routes.VetHome.route, Icons.Default.Home),
     BottomNavItem("Booking", Routes.VetAppointments.route, Icons.Default.Event),
+    BottomNavItem("Track", Routes.VetTrackPet.route, Icons.Default.Pets),
     BottomNavItem("Reviews", Routes.VetPatients.route, Icons.Default.Comment),
     BottomNavItem("Profile", Routes.VetProfile.route, Icons.Default.Person),
 )
@@ -329,7 +331,10 @@ fun Navigation() {
                 shouldShowBottomBar.value = true
                 VetReviewProfile(navController)
             }
-
+            composable(Routes.VetTrackPet.route) {
+                shouldShowBottomBar.value = true
+                VetTrackPet(navController)
+            }
 
         }
     }
