@@ -15,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import pe.edu.upc.upet.feature_petOwner.data.remote.PetOwnerRequest
+import pe.edu.upc.upet.feature_petOwner.data.repository.PetOwnerRepository
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.shared.AuthButton
 import pe.edu.upc.upet.ui.shared.AuthInputTextField
@@ -66,7 +68,34 @@ fun PetOwnerPostRegisterForm(navigateTo: (String) -> Unit, userId: Int){
         )
     }
 
-
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "Confirm Coordinates") },
+            text = { Text(text = dialogMessage.value) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        createNewPetOwner(userId, PetOwnerRequest(
+                            numberPhone = numberPhone.value,
+                            location = dialogMessage.value.split(":")[1].trim() // Extract coordinates from message
+                        ), navigateTo = { navigateTo(Routes.OwnerHome.route) }
+                        )
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 // This function is used to get the coordinates from an address using the Geocoder class
@@ -82,5 +111,16 @@ fun getCoordinatesFromAddress(context: Context, mAddress: String): String {
         "${location.latitude},${location.longitude}"
     } catch (e: Exception) {
         "Fail to find Lat,Lng"
+    }
+}
+
+fun createNewPetOwner(userId: Int,
+                      petOwnerData: PetOwnerRequest,
+                      petOwnerRepository: PetOwnerRepository = PetOwnerRepository(),
+                      navigateTo: () -> Unit
+){
+    petOwnerRepository.createPetOwner(userId, petOwnerData) {
+        navigateTo()
+        println("Pet Owner created")
     }
 }

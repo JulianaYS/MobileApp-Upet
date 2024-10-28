@@ -27,6 +27,7 @@ import pe.edu.upc.upet.ui.shared.TextFieldType
 import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
+import pe.edu.upc.upet.ui.theme.Salmon
 import pe.edu.upc.upet.ui.theme.UpetBackGroundPrimary
 
 @Composable
@@ -45,7 +46,7 @@ fun SignInScreen(authRepository: AuthRepository = AuthRepository(), navigateTo: 
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .background(UpetBackGroundPrimary)
+                .background(Salmon)
         ){
 
             Box {
@@ -53,7 +54,7 @@ fun SignInScreen(authRepository: AuthRepository = AuthRepository(), navigateTo: 
                     modifier = Modifier
                         .padding(paddingValues)
                         .fillMaxSize()
-                        .background(UpetBackGroundPrimary)
+                        .background(Salmon)
                 ) {
                     AuthHeader(texto = "Login")
                     HorizontalDivider(

@@ -25,4 +25,6 @@ val Green1 = Color(0xFF52D375)
 val Yellow1 = Color(0xFFFFB800)
 val Yellow2 = Color(0xFFFFEB32)
 
-val UpetBackGroundPrimary = Color(0xFFFFFFFF)
+val Salmon = Color(0x1AF15C5D)
+
+val UpetBackGroundPrimary = Color(0xFFCF8E8E)

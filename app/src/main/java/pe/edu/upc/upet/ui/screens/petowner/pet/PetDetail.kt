@@ -18,8 +18,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TagFaces
 import androidx.compose.material.icons.outlined.Balance
 import androidx.compose.material.icons.outlined.Pets
@@ -27,10 +29,13 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,9 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.skydoves.landscapist.glide.GlideImage
 import pe.edu.upc.upet.feature_pet.data.remote.GenderEnum
@@ -52,6 +60,11 @@ import pe.edu.upc.upet.feature_pet.domain.Pet
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.CustomReturnButton
+import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.Blue1
+import pe.edu.upc.upet.ui.theme.BorderPadding
+import pe.edu.upc.upet.ui.theme.Pink
+import pe.edu.upc.upet.ui.theme.poppinsFamily
 
 @Composable
 fun PetDetail(navController: NavHostController, petId: Int) {
@@ -73,7 +86,11 @@ fun PetDetail(navController: NavHostController, petId: Int) {
     }
     val petInfoList = petResponseToPetInfoList(petValue)
 
-    Scaffold(modifier = Modifier.padding(16.dp)) { paddingValues ->
+    Scaffold(modifier = Modifier,
+        topBar = {
+            TopBarPet(navController = navController, title = petValue.name, gender= petValue.gender)
+        },
+        ) { paddingValues ->
         LazyColumn {
             item {
                 Column(
@@ -81,16 +98,17 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                         .padding(paddingValues)
                         .fillMaxWidth()
                         .fillMaxSize()
-                        .padding(10.dp, 10.dp),
+                        .background(Blue1),
                     verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
-                    Row (modifier = Modifier.fillMaxWidth(),
+                    /*Row (modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween){
                         CustomReturnButton(navController = navController)
                         Text(
                             text = petValue.name,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 24.sp,
+                            fontSize = 10.sp,
+                            color = Color.Black,
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                         )
@@ -103,7 +121,8 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 contentDescription = petValue.gender.toString()
                             )
                         }
-                    }
+                    }*/
+
                     println("Gender: ${petValue.gender}")
                     ImageRectangle(petValue.image_url)
 
@@ -175,7 +194,7 @@ fun ImageRectangle(imageUrl: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
+            .padding(16.dp)
     ) {
         GlideImage(
             modifier = Modifier
@@ -256,7 +275,7 @@ fun MedicalHistoryCard(title: String, date: String, description: String,icon: Im
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector =icon,
+                        imageVector = icon,
                         contentDescription = "Medical services",
                         tint = Color.White,
                         modifier = Modifier.size(32.dp)
@@ -293,5 +312,65 @@ fun MedicalHistoryCard(title: String, date: String, description: String,icon: Im
                 }
             }
         }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBarPet(
+    navController: NavController,
+    title: String,
+    gender: GenderEnum
+) {
+    CenterAlignedTopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            titleContentColor = Color.Black,
+        ),
+        title = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                CustomReturnButton1(navController = navController)
+                Text(
+                    text = title,
+                    style = TextStyle(
+                        color = Color.Black,
+                        fontSize = 24.sp,
+                        fontFamily = poppinsFamily,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    textAlign = TextAlign.Center,
+                    letterSpacing = 1.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (gender == GenderEnum.Male) Icons.Filled.Male else Icons.Filled.Female,
+                    contentDescription = gender.toString(),
+                    tint = Color.Black
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun CustomReturnButton1(navController: NavController) {
+    IconButton(
+        onClick = { navController.popBackStack() },
+        modifier = Modifier
+            .clip(RoundedCornerShape(15.dp))
+            .background(Pink)
+    ) {
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            "Back",
+            modifier = Modifier.fillMaxSize(1f),
+            tint = Blue1
+        )
     }
 }

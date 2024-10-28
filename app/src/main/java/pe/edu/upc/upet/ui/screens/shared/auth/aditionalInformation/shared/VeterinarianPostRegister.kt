@@ -27,6 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import pe.edu.upc.upet.feature_vet.data.remote.VetRequest
+import pe.edu.upc.upet.feature_vet.data.repository.VetRepository
+import pe.edu.upc.upet.feature_vetClinic.data.remote.VeterinaryClinicRequest
+import pe.edu.upc.upet.feature_vetClinic.data.repository.VeterinaryClinicRepository
+import pe.edu.upc.upet.feature_vetClinic.domain.VeterinaryClinic
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.shared.AuthButton
 import pe.edu.upc.upet.ui.shared.AuthInputTextField
@@ -46,8 +51,8 @@ fun VeterinarianPostRegister(navigateTo : (String) -> Unit, userId: Int){
         ) },
         form = { VeterinarianPostRegisterForm(navigateTo,userId) }
     )
-
 }
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VeterinarianPostRegisterForm(navigateTo : (String) -> Unit, userId: Int){
@@ -71,10 +76,15 @@ fun VeterinarianPostRegisterForm(navigateTo : (String) -> Unit, userId: Int){
 @Composable
 fun ExistingClinicForm(navigateTo : (String) -> Unit,
                        userId: Int,
-
+                       veterinaryClinicRepository: VeterinaryClinicRepository = VeterinaryClinicRepository()
 ){
 
-
+    val clinics = remember {
+        mutableStateOf(emptyList<VeterinaryClinic>())
+    }
+    veterinaryClinicRepository.getAllVeterinaryClinics { vets ->
+        clinics.value = vets
+    }
     val selectedClinics = remember {
         mutableStateOf("")
     }
@@ -82,7 +92,13 @@ fun ExistingClinicForm(navigateTo : (String) -> Unit,
         mutableStateOf("")
     }
 
-
+    AuthInputTextField(
+        input = selectedClinics,
+        placeholder = "Select your clinic",
+        label = "Clinic",
+        type = TextFieldType.Dropdown,
+        dropdownList = clinics.value.map { it.name },
+    )
     Spacer(modifier = Modifier.height(22.dp))
     AuthInputTextField(
         input = password,
@@ -92,9 +108,18 @@ fun ExistingClinicForm(navigateTo : (String) -> Unit,
     )
     Spacer(modifier = Modifier.height(22.dp))
 
-
-
+    AuthButton(text ="Send", onClick = {
+        createVeterinary(
+            userId,
+            VetRequest(
+                selectedClinics.value,
+                password.value
+            ),
+            navigateTo = { navigateTo(Routes.VetHome.route)}
+        )
+    })
 }
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewClinicForm(navigateTo : (String) -> Unit, userId: Int) {
@@ -155,7 +180,41 @@ fun NewClinicForm(navigateTo : (String) -> Unit, userId: Int) {
             })
         }
     }
-
+    if (showDialog.value){
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "Confirm Coordinates") },
+            text = { Text(text = dialogMessage.value) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        createNewClinic(
+                            userId,
+                            VeterinaryClinicRequest(
+                                name = clinicName.value,
+                                location = dialogMessage.value.split(":")[1].trim(),
+                                phoneNumber = phoneNumber.value,
+                                description = description.value,
+                                officeHoursStart = officeHoursStart.value,
+                                officeHoursEnd = officeHoursEnd.value,
+                            ),
+                            navigateTo = { navigateTo(Routes.VetHome.route) }
+                        )
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 // This function is used to get the coordinates from an address using the Geocoder class
 // It receives a context and an address as parameters
@@ -174,6 +233,45 @@ fun getCoordinatesFromAddressClinic(context: Context, mAddress: String): String 
 }
 
 
+fun createVeterinary(
+    userId: Int,
+    vetRequest: VetRequest,
+    vetRepository: VetRepository = VetRepository(),
+    navigateTo: () -> Unit = {}
+){
+    vetRepository.createVet(userId, vetRequest){
+        navigateTo()
+    }
+}
+fun createNewClinic(userId: Int,
+                    clinicRequest: VeterinaryClinicRequest,
+                    clinicRepository : VeterinaryClinicRepository = VeterinaryClinicRepository(),
+                    navigateTo: () -> Unit
+){
+    Log.d("ClinicRequest", userId.toString())
+    Log.d("ClinicRequest", clinicRequest.name)
+    Log.d("ClinicRequest", clinicRequest.location)
+    Log.d("ClinicRequest", clinicRequest.phoneNumber)
+
+    clinicRepository.createVeterinaryClinic(clinicRequest){ clinicResponse ->
+        Log.d("ClinicResponse", clinicResponse.toString())
+        val clinicId= clinicResponse?.id ?: error("Error creating clinic")
+        val clinicName= clinicResponse.name
+        Log.d("ClinicResponse", "Clinic created with id $clinicId")
+
+        clinicRepository.generatePassword(clinicId){password->
+            Log.d("Password", "Password generated: $password")
+            createVeterinary(
+                userId,
+                VetRequest(
+                    clinicName,
+                    password.toString()
+                ),
+                navigateTo = navigateTo
+            )
+        }
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

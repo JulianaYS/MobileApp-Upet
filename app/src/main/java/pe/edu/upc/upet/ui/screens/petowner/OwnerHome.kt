@@ -3,6 +3,7 @@ package pe.edu.upc.upet.ui.screens.petowner
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,18 +37,37 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.skydoves.landscapist.glide.GlideImage
 import pe.edu.upc.upet.navigation.Routes
+import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
+import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.PinkStrong
+import pe.edu.upc.upet.ui.theme.Salmon
 import pe.edu.upc.upet.utils.TokenManager
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun OwnerHome(navController: NavController){
     Log.d("OwnerHome", "OwnerHome")
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(BorderPadding)) {
-        item { UserSection(navController) }
+    Scaffold(modifier = Modifier) { paddingValues->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(Salmon)
+        ){
+            LazyColumn(modifier = Modifier
+                .fillMaxSize()
+
+            ) {
+                item { UserSection(navController) }
+
+            }
+
+        }
+
 
     }
+
 }
 
 @Composable
@@ -57,7 +78,7 @@ fun UserSection(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp).background(Pink),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -74,12 +95,12 @@ fun UserSection(navController: NavController) {
                 Text(
                     text = greeting,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
+                    color = Blue1
                 )
                 Text(
                     text = "Welcome!",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White
+                    color = Blue1
                 )
             }
         }
@@ -89,7 +110,7 @@ fun UserSection(navController: NavController) {
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications",
-                tint = Color.White
+                tint = Blue1
             )
         }
     }
