@@ -44,6 +44,7 @@ import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerEditProfile
 import pe.edu.upc.upet.ui.screens.petowner.profile.OwnerProfile
 import pe.edu.upc.upet.ui.screens.petowner.review.AddReview
 import pe.edu.upc.upet.ui.screens.petowner.review.VetReviews
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.OwnerClinicMap
 import pe.edu.upc.upet.ui.screens.shared.auth.aditionalInformation.PostRegisterScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.ConfirmCodeScreen
 import pe.edu.upc.upet.ui.screens.shared.auth.recovery.NewPasswordScreen
@@ -55,6 +56,8 @@ import pe.edu.upc.upet.ui.screens.shared.notification.CreateNotification
 import pe.edu.upc.upet.ui.screens.vet.GeneratePassword
 import pe.edu.upc.upet.ui.screens.vet.VetAppointmentDetail
 import pe.edu.upc.upet.ui.screens.vet.VetAppointments
+import pe.edu.upc.upet.ui.screens.vet.VetEditPassword
+import pe.edu.upc.upet.ui.screens.vet.VetEditProfile
 import pe.edu.upc.upet.ui.screens.vet.VetHome
 import pe.edu.upc.upet.ui.screens.vet.VetMedicalHistory
 import pe.edu.upc.upet.ui.screens.vet.VetProfile
@@ -68,13 +71,13 @@ val ownerBottomNavItems = listOf(
     BottomNavItem("Home", Routes.OwnerHome.route, Icons.Default.Home),
     BottomNavItem("Pets", Routes.PetList.route, Icons.Default.Pets),
     BottomNavItem("Clinics", Routes.OwnerClinicList.route, Icons.Default.LocalHospital),
-    BottomNavItem("Appointments", Routes.AppointmentList.route, Icons.Default.Event),
+    BottomNavItem("Booking", Routes.AppointmentList.route, Icons.Default.Event),
     BottomNavItem("Profile", Routes.OwnerProfile.route, Icons.Default.Person)
 )
 
 val vetBottomNavItems = listOf(
     BottomNavItem("Home", Routes.VetHome.route, Icons.Default.Home),
-    BottomNavItem("Appointments", Routes.VetAppointments.route, Icons.Default.Event),
+    BottomNavItem("Booking", Routes.VetAppointments.route, Icons.Default.Event),
     BottomNavItem("Reviews", Routes.VetPatients.route, Icons.Default.Comment),
     BottomNavItem("Profile", Routes.VetProfile.route, Icons.Default.Person),
 )
@@ -199,6 +202,10 @@ fun Navigation() {
                 shouldShowBottomBar.value = true
                 OwnerClinicList(navController)
             }
+            composable(Routes.OwnerClinicMap.route) {
+                shouldShowBottomBar.value = true
+                OwnerClinicMap(navController)
+            }
             composable(Routes.OwnerVetProfile.route){backStackEntry ->
                 shouldShowBottomBar.value = true
                 val vetId = backStackEntry.arguments?.getString("vetId")?.toInt()
@@ -270,7 +277,6 @@ fun Navigation() {
             }
 
 
-
             // Vet routes ---------------------------------------------------------------------------------
             composable(Routes.VetHome.route) {
                 role.value = TokenManager.getUserIdAndRoleFromToken()?.second ?: ""
@@ -281,6 +287,15 @@ fun Navigation() {
             composable(Routes.VetProfile.route) {
                 shouldShowBottomBar.value = true
                 VetProfile(navController)
+            }
+
+            composable(Routes.VetEditProfile.route) {
+                shouldShowBottomBar.value = true
+                VetEditProfile(navController)
+            }
+            composable(Routes.VetEditPassword.route) {
+                shouldShowBottomBar.value = true
+                VetEditPassword(navController)
             }
 
             composable(Routes.GeneratePassword.route){
