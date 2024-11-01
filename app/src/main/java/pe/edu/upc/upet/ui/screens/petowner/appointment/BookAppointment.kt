@@ -50,7 +50,6 @@ import pe.edu.upc.upet.ui.shared.TextSubtitle2
 import pe.edu.upc.upet.ui.shared.TopBar
 import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -69,26 +68,14 @@ fun BookAppointment(navController: NavController, vetId: Int) {
         )
     }
     var currentYearMonth by remember { mutableStateOf(YearMonth.now()) }
-    var availableTimes by remember { mutableStateOf<Map<LocalDate, List<String>>>(emptyMap()) }
+    var availableTimes by remember { mutableStateOf<List<String>>(emptyList()) }
     val vetRepository = VetRepository()
 
-    LaunchedEffect(key1 = Unit) {
-        val startOfWeek = LocalDate.now().with(DayOfWeek.MONDAY)
-        val endOfWeek = LocalDate.now().with(DayOfWeek.SUNDAY)
-
-        (0..6).forEach { i ->
-            val date = startOfWeek.plusDays(i.toLong())
-            vetRepository.getAvailableTimes(vetId, AvailableTimesRequest(date.toString())) { times ->
-                Log.d("AvailableTimes 2024-06-18", date.toString())
-                Log.d("AvailableTimes", times.toString())
-                availableTimes = availableTimes.toMutableMap().apply {
-                    if (times != null) {
-                        this[date] = times
-                    } else {
-                        this[date] = emptyList()
-                    }
-                }
-            }
+    LaunchedEffect(key1 = selectedDate) {
+        vetRepository.getAvailableTimes(vetId, AvailableTimesRequest(selectedDate.toString())) { times ->
+            Log.d("AvailableTimes", selectedDate.toString())
+            Log.d("AvailableTimes", times.toString())
+            availableTimes = times?.toSet()?.toList() ?: emptyList()
         }
     }
 
@@ -136,7 +123,7 @@ fun BookAppointment(navController: NavController, vetId: Int) {
                         TextSubtitle2("Select Available Hour")
 
                         TimePickerView(
-                            availableTimes = availableTimes[selectedDate]?.map { LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm:ss")).toString() },
+                            availableTimes = availableTimes.map { LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm:ss")).toString() },
                             selectedTime = selectedTime,
                             onTimeSelected = { time ->
                                 selectedTime = time

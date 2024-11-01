@@ -25,13 +25,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,8 +55,14 @@ import pe.edu.upc.upet.utils.TokenManager
 
 @Composable
 fun OwnerProfile(navController: NavHostController) {
-    val petOwner = getOwner()?: return
-    val userEmail = TokenManager.getEmail()?: return
+    val petOwner = getOwner() ?: return
+    val userEmail = TokenManager.getEmail() ?: return
+    val context = LocalContext.current
+    var streetName by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(petOwner.location) {
+        streetName = getStreetNameFromCoordinates(petOwner.location, context)
+    }
 
     Scaffold(
         topBar = { TopBar(navController = navController, title = "My Profile") },
@@ -62,7 +72,7 @@ fun OwnerProfile(navController: NavHostController) {
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxWidth()
-                .padding(start = BorderPadding, end = BorderPadding)
+                .padding(start = BorderPadding, end = BorderPadding, bottom = BorderPadding)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -70,10 +80,11 @@ fun OwnerProfile(navController: NavHostController) {
             Spacer(modifier = Modifier.height(10.dp))
 
             ProfileHeader(petOwner.id, petOwner.imageUrl)
+
             UserInfo(petOwner.name, userEmail,
                 listOf(
                     InfoRowData(Icons.Default.Person4, "Phone", petOwner.numberPhone),
-                    InfoRowData(Icons.Default.Home, "Address", getStreetNameFromCoordinates(location = petOwner.location))
+                    InfoRowData(Icons.Default.Home, "Address", streetName)
                 )
             )
             val subscriptionRoute = if (petOwner.subscriptionType == SubscriptionType.BASIC) {
@@ -89,6 +100,7 @@ fun OwnerProfile(navController: NavHostController) {
                     navController.navigate(Routes.SignIn.route)
                 }
             )
+
         }
     }
 }
@@ -135,7 +147,7 @@ fun ProfileButtons(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(15.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         profileButtons.forEach { button ->
             CustomButton(button.text, button.icon, button.onClick)

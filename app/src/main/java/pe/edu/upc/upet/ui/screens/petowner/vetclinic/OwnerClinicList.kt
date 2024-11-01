@@ -1,6 +1,8 @@
 package pe.edu.upc.upet.ui.screens.petowner.vetclinic
 
+import android.content.Context
 import android.location.Geocoder
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +47,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import pe.edu.upc.upet.feature_vetClinic.data.repository.VeterinaryClinicRepository
 import pe.edu.upc.upet.feature_vetClinic.domain.VeterinaryClinic
 import pe.edu.upc.upet.navigation.Routes
@@ -114,8 +118,53 @@ fun SearchField(searchQuery: String, onValueChange: (String) -> Unit) {
     )
 }
 
+
+
+fun formatTime(time: String): String {
+    val inputFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val date = inputFormat.parse(time)
+    return outputFormat.format(date)
+}
+
+fun capitalizeFirstLetter(text: String): String {
+    return text.split(" ").joinToString(" ") { word ->
+        word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    }
+}
+
+
+suspend fun getStreetNameFromCoordinates(location: String, context: Context): String {
+    return try {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        val coordinates = location.split(",")
+        val latitude = coordinates[0].toDouble()
+        val longitude = coordinates[1].toDouble()
+        val addresses = withContext(Dispatchers.IO) {
+            geocoder.getFromLocation(latitude, longitude, 1)
+        }
+        if (!addresses.isNullOrEmpty()) {
+            addresses[0].getAddressLine(0)
+        } else {
+            "Unknown location"
+        }
+    } catch (e: NumberFormatException) {
+        Log.e("getStreetNameFromCoordinates", "Invalid coordinates: $location", e)
+        "Invalid coordinates"
+    } catch (e: Exception) {
+        Log.e("getStreetNameFromCoordinates", "Error getting address: $location", e)
+        "Error getting address"
+    }
+}
 @Composable
 fun VetClinicCard(navController: NavController, veterinaryClinic: VeterinaryClinic) {
+    val context = LocalContext.current
+    var streetName by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(veterinaryClinic.location) {
+        streetName = getStreetNameFromCoordinates(veterinaryClinic.location, context)
+    }
+
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
@@ -159,7 +208,7 @@ fun VetClinicCard(navController: NavController, veterinaryClinic: VeterinaryClin
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = getStreetNameFromCoordinates(location = veterinaryClinic.location),
+                            text = streetName,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
@@ -186,21 +235,9 @@ fun VetClinicCard(navController: NavController, veterinaryClinic: VeterinaryClin
     }
 }
 
-fun formatTime(time: String): String {
-    val inputFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-    val outputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    val date = inputFormat.parse(time)
-    return outputFormat.format(date)
-}
-
-fun capitalizeFirstLetter(text: String): String {
-    return text.split(" ").joinToString(" ") { word ->
-        word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-    }
-}
-
+/*
 @Composable
-fun getStreetNameFromCoordinates2(location: String): String {
+fun getStreetNameFromCoordinates(location: String): String {
     val context = LocalContext.current
     val geocoder = remember { Geocoder(context, Locale.getDefault()) }
     val coordinates = location.split(",")
@@ -213,7 +250,7 @@ fun getStreetNameFromCoordinates2(location: String): String {
         "Unknown location"
     }
 }
-
+/*
 @Composable
 fun getStreetNameFromCoordinates(location: String): String {
     val context = LocalContext.current
@@ -230,4 +267,4 @@ fun getStreetNameFromCoordinates(location: String): String {
     } else {
         "Unknown location"
     }
-}
+}*/

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,7 +32,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -100,7 +98,7 @@ fun VetReviews(navController: NavController, vetId: Int, showFAB: Boolean = true
 @Composable
 fun ReviewCard(review: ReviewResponse){
     Card(modifier = Modifier
-        .padding(BorderPadding)
+        .padding(start = BorderPadding, end = BorderPadding, bottom = 10.dp, top = 8.dp)
         .shadow(elevation = 8.dp, shape = RoundedCornerShape(10.dp)),
         colors = CardDefaults.cardColors(
             containerColor = Color.White)

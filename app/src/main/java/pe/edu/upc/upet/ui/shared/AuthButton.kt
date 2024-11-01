@@ -32,7 +32,7 @@ fun AuthButton(text: String, onClick: () -> Unit = {}) {
                 top = 4.dp, bottom = 4.dp,
                 start = BorderPadding, end = BorderPadding,
             )
-            .shadow(15.dp, RoundedCornerShape(10.dp), clip = false, ambientColor = Pink, spotColor = Pink)
+            .shadow(30.dp, RoundedCornerShape(20.dp), clip = false, ambientColor = Pink, spotColor = Pink)
     ) {
         Text(
             text = text,

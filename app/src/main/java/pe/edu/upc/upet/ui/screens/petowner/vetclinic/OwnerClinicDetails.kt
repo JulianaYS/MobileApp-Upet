@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -61,6 +62,8 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
     val vetRepository = remember { VetRepository() }
     var vetClinic by remember { mutableStateOf<VeterinaryClinic?>(null) }
     var vets by remember { mutableStateOf<List<Vet>?>(null) }
+    val context = LocalContext.current
+    var streetName by remember { mutableStateOf("Loading...") }
 
     LaunchedEffect(key1 = vetClinicId) {
         vetClinicRepository.getVeterinaryClinicById(vetClinicId) { clinic ->
@@ -71,6 +74,12 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
     LaunchedEffect(key1 = vetClinicId) {
         vetRepository.getVetsByClinicId(vetClinicId) { vetList ->
             vets = vetList
+        }
+    }
+
+    LaunchedEffect(vetClinic?.location) {
+        vetClinic?.location?.let { location ->
+            streetName = getStreetNameFromCoordinates(location, context)
         }
     }
 
@@ -96,7 +105,7 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
                         phoneNumber = "987654321",
                         email = veterinaryClinic.name.lowercase(Locale.ROOT) + "@" + "gmail.com",
                         operatingHours = " ${formatTime(veterinaryClinic.office_hours_start) + " - " + formatTime(veterinaryClinic.office_hours_end)}",
-                        location = getStreetNameFromCoordinates(veterinaryClinic.location)
+                        location = streetName
                     )
 
                     AboutUsSection(description = capitalizeFirstLetter2(veterinaryClinic.description))
@@ -108,8 +117,6 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
                             VeterinaryCard(vet, navController)
                         }
                     }
-
-
                 }
             }
         )

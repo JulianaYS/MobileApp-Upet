@@ -122,17 +122,7 @@ fun AppointmentDetail(navController: NavController, appointmentId: Int) {
                 .padding(BorderPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Column {
 
-                }
-            }
             Spacer(modifier = Modifier.height(10.dp))
 
             TextSubtitle2("Schedule Appointment")
@@ -154,6 +144,8 @@ fun AppointmentDetail(navController: NavController, appointmentId: Int) {
                 TextSubtitle2("Owner Information")
 
                 OwnerInformation(ownerPet!!, navController)
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 CustomButton(text = "Add report") {
                     navController.navigate(Routes.AddReport.createRoute(pet!!.id))
@@ -319,7 +311,7 @@ fun PatientInformation(pet: Pet, appointment: Appointment, navController: NavCon
 
     Card(
         modifier = Modifier
-            .padding(top=8.dp)
+            .padding(top = 8.dp)
             .fillMaxWidth()
             .clickable(onClick = {
                 navController.navigate(Routes.PetDetails.createRoute(pet.id))

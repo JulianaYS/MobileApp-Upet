@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.filled.TagFaces
 import androidx.compose.material.icons.outlined.Balance
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.TagFaces
 import androidx.compose.material.icons.outlined.Thermostat
@@ -63,10 +64,12 @@ import pe.edu.upc.upet.feature_pet.data.remote.GenderEnum
 import pe.edu.upc.upet.feature_pet.data.repository.PetRepository
 import pe.edu.upc.upet.feature_pet.domain.Pet
 import pe.edu.upc.upet.navigation.Routes
+import pe.edu.upc.upet.ui.screens.petowner.getRole
 import pe.edu.upc.upet.ui.screens.petowner.isOwnerAuthenticated
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.CustomButton2
 import pe.edu.upc.upet.ui.theme.Blue1
+import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.poppinsFamily
 
@@ -106,7 +109,7 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                         .padding(paddingValues)
                         .fillMaxWidth()
                         .fillMaxSize()
-                        .background(Color(0xFFF0F6FF)),
+                        .background(Color.White),
                     verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
                     /*Row (modifier = Modifier.fillMaxWidth(),
@@ -139,7 +142,7 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                             .fillMaxHeight()
                             .fillMaxWidth()
                             .clip(shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                            .background(Color.White)
+                            .background(Color(0xFFF0F6FF))
                     ){
                         Column (modifier = Modifier.padding(15.dp, 15.dp)) {
                             Row(
@@ -166,14 +169,34 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 }
                             }
 
-                            LazyRow {
-                                items(petInfoList) { petInfo ->
-                                    PetInformationCard(petInfo.title, petInfo.icon, petInfo.content)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start=10.dp, bottom = BorderPadding)
+                            ) {
+                                petInfoList.forEach { petInfo ->
+                                    val content = if (petInfo.title == "Weight") "${petInfo.content} k." else petInfo.content
+                                    PetInformationCard(petInfo.title, petInfo.icon, content)
                                 }
                             }
 
-                            IoTInformationCard(title = "Heart Rate", icon = Icons.Outlined.Favorite, content = "75 bpm")
-                            IoTInformationCard(title = "Temperature", icon = Icons.Outlined.Thermostat, content = "37.5 °C")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    IoTInformationCard(title = "Temperature", icon = Icons.Outlined.Thermostat, content = "37.5 °C")
+                                    IoTInformationCard(title = "LPM", icon = Icons.Outlined.Favorite, content = "75 lpm")
+                                }
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    IoTInformationCard(title = "RPM", icon = Icons.Outlined.Favorite, content = "40 rpm")
+                                    IoTInformationCard(title = "GPS", icon = Icons.Outlined.Map, content = "75 lpm")
+                                }
+                            }
 
                             Text(
                                 text = "More details",
@@ -184,25 +207,23 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                     .padding(top =10.dp, bottom = 10.dp)
                             )
 
-                            if (isOwnerAuthenticated()) {
-                                CustomButton(text = "Add Medical Information") {
-                                    navController.navigate(Routes.AddReport.createRoute(petValue.id))
+                            if (getRole() == "Vet") {
+                                CustomButton(text = "Medical History") {
+                                    navController.navigate(Routes.petMedicalHistory.createRoute(petValue.id))
                                 }
-                                CustomButton(text = "Edit Profile") {
-                                    navController.navigate(Routes.EditPetDetail.createRoute(petValue.id))
-                                }
+
                             } else {
                                 CustomButton2(
                                     text = if (isTracking) "Stop tracking" else "Start tracking",
                                     onClick = {
-                                    if (isTracking) {
-                                        isTracking = false
-                                        iconColor = Color.Red
-                                        iconImage = Icons.Filled.TagFaces
-                                    } else {
-                                        showDialog = true
-                                    }
-                                })
+                                        if (isTracking) {
+                                            isTracking = false
+                                            iconColor = Color.Red
+                                            iconImage = Icons.Filled.TagFaces
+                                        } else {
+                                            showDialog = true
+                                        }
+                                    })
                                 if (showDialog) {
                                     TrackingDialog(
                                         onDismiss = { showDialog = false },
@@ -214,10 +235,17 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                         }
                                     )
                                 }
+
+                                CustomButton(text = "Edit Profile") {
+                                    navController.navigate(Routes.EditPetDetail.createRoute(petValue.id))
+                                }
+
+                                CustomButton(text = "Add Medical Information") {
+                                    navController.navigate(Routes.AddReport.createRoute(petValue.id))
+                                }
+
                             }
-                            CustomButton(text = "Medical History") {
-                                navController.navigate(Routes.petMedicalHistory.createRoute(petValue.id))
-                            }
+
                         }
                     }
                 }
@@ -264,7 +292,7 @@ fun IoTInformationCard(title: String, icon: ImageVector, content: String) {
             .height(100.dp)
             .padding(6.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
+            containerColor = Color(0xFFDAF1DB),
             contentColor = Color(0xFF0A2540)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -315,6 +343,44 @@ fun PetInformationCard(title:String, icon: ImageVector, content:String){
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF0F6FF),
+            contentColor = Color(0xFF0A2540)
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "$title: ",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Pink,
+                modifier = Modifier.weight(0.5f)
+            )
+            Text(
+                text = content,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .weight(1f)
+
+            )
+
+        }
+
+    }
+}
+/*
+@Composable
+fun PetInformationCard(title:String, icon: ImageVector, content:String){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
             .width(180.dp)
             .height(100.dp)
             .padding(6.dp),
@@ -346,8 +412,7 @@ fun PetInformationCard(title:String, icon: ImageVector, content:String){
                 .align(Alignment.CenterHorizontally),
         )
     }
-}
-
+}*/
 
 @Composable
 fun MedicalHistoryCard(title: String, date: String, description: String,icon: ImageVector) {
@@ -455,7 +520,7 @@ fun TopBarPet(
                 Icon(
                     imageVector = if (gender == GenderEnum.Male) Icons.Filled.Male else Icons.Filled.Female,
                     contentDescription = gender.toString(),
-                    tint = Color.Black
+                    tint = if (gender == GenderEnum.Male) Blue1 else Pink
                 )
             }
         }
@@ -474,7 +539,7 @@ fun CustomReturnButton1(navController: NavController) {
             Icons.AutoMirrored.Filled.KeyboardArrowLeft,
             "Back",
             modifier = Modifier.fillMaxSize(1f),
-            tint = Blue1
+            tint = Color.White
         )
     }
 }
