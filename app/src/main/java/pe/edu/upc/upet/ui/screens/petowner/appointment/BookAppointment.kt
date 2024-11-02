@@ -48,8 +48,8 @@ import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.TextSubtitle2
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -68,32 +68,20 @@ fun BookAppointment(navController: NavController, vetId: Int) {
         )
     }
     var currentYearMonth by remember { mutableStateOf(YearMonth.now()) }
-    var availableTimes by remember { mutableStateOf<Map<LocalDate, List<String>>>(emptyMap()) }
+    var availableTimes by remember { mutableStateOf<List<String>>(emptyList()) }
     val vetRepository = VetRepository()
 
-    LaunchedEffect(key1 = Unit) {
-        val startOfWeek = LocalDate.now().with(DayOfWeek.MONDAY)
-        val endOfWeek = LocalDate.now().with(DayOfWeek.SUNDAY)
-
-        (0..6).forEach { i ->
-            val date = startOfWeek.plusDays(i.toLong())
-            vetRepository.getAvailableTimes(vetId, AvailableTimesRequest(date.toString())) { times ->
-                Log.d("AvailableTimes 2024-06-18", date.toString())
-                Log.d("AvailableTimes", times.toString())
-                availableTimes = availableTimes.toMutableMap().apply {
-                    if (times != null) {
-                        this[date] = times
-                    } else {
-                        this[date] = emptyList()
-                    }
-                }
-            }
+    LaunchedEffect(key1 = selectedDate) {
+        vetRepository.getAvailableTimes(vetId, AvailableTimesRequest(selectedDate.toString())) { times ->
+            Log.d("AvailableTimes", selectedDate.toString())
+            Log.d("AvailableTimes", times.toString())
+            availableTimes = times?.toSet()?.toList() ?: emptyList()
         }
     }
 
     Scaffold(topBar = {
         TopBar(navController = navController, title = "Book Appointment")
-    }, modifier = Modifier.padding(16.dp)) { paddingValues ->
+    }, modifier = Modifier) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn {
                 item {
@@ -109,7 +97,7 @@ fun BookAppointment(navController: NavController, vetId: Int) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0x31E0E0E0), RoundedCornerShape(15.dp))
+                                .background(Color(0xA9F1DADC), RoundedCornerShape(15.dp))
                                 .padding(8.dp)
                         ) {
                             Column {
@@ -135,7 +123,7 @@ fun BookAppointment(navController: NavController, vetId: Int) {
                         TextSubtitle2("Select Available Hour")
 
                         TimePickerView(
-                            availableTimes = availableTimes[selectedDate]?.map { LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm:ss")).toString() },
+                            availableTimes = availableTimes.map { LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm:ss")).toString() },
                             selectedTime = selectedTime,
                             onTimeSelected = { time ->
                                 selectedTime = time
@@ -172,7 +160,7 @@ fun MonthPicker(currentYearMonth: YearMonth, onYearMonthChange: (YearMonth) -> U
         Text(
             text = currentYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
             fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
 
         IconButton(onClick = {
@@ -219,11 +207,11 @@ fun CalendarView(currentYearMonth: YearMonth, selectedDate: LocalDate, onDateSel
                                 .padding(4.dp)
                                 .border(
                                     width = 2.dp,
-                                    color = if (date == today) Color.White else Color.Transparent,
+                                    color = if (date == today) Blue1 else Color.Transparent,
                                     shape = CircleShape,
                                 )
                                 .background(
-                                    if (selectedDate == date) Color.White else Color.Transparent,
+                                    if (selectedDate == date) Blue1 else Color.Transparent,
                                     RoundedCornerShape(50)
                                 )
                                 .clickable {
@@ -233,8 +221,8 @@ fun CalendarView(currentYearMonth: YearMonth, selectedDate: LocalDate, onDateSel
                             Text(
                                 text = dayOfMonth.toString(),
                                 color = when {
-                                    selectedDate == date -> Color.Black
-                                    else -> Color.White
+                                    selectedDate == date -> Color.White
+                                    else -> Color.Gray
                                 },
                                 modifier = Modifier.align(Alignment.Center),
                                 textAlign = TextAlign.Center

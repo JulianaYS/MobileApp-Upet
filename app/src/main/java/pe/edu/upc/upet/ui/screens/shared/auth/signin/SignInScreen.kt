@@ -2,7 +2,6 @@ package pe.edu.upc.upet.ui.screens.shared.auth.signin
 
 import android.util.Log
 import android.util.Patterns
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,9 +25,6 @@ import pe.edu.upc.upet.ui.shared.Dialog
 import pe.edu.upc.upet.ui.shared.TextFieldType
 import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
-import pe.edu.upc.upet.ui.theme.Pink
-import pe.edu.upc.upet.ui.theme.Salmon
-import pe.edu.upc.upet.ui.theme.UpetBackGroundPrimary
 
 @Composable
 fun SignInScreen(authRepository: AuthRepository = AuthRepository(), navigateTo: (String) -> Unit){
@@ -46,15 +42,13 @@ fun SignInScreen(authRepository: AuthRepository = AuthRepository(), navigateTo: 
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .background(Salmon)
         ){
-
             Box {
                 Column(
                     modifier = Modifier
                         .padding(paddingValues)
                         .fillMaxSize()
-                        .background(Salmon)
+
                 ) {
                     AuthHeader(texto = "Login")
                     HorizontalDivider(

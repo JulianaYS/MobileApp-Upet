@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -52,6 +53,7 @@ import pe.edu.upc.upet.ui.screens.petowner.pet.ImageRectangle
 import pe.edu.upc.upet.ui.shared.TextNormal
 import pe.edu.upc.upet.ui.shared.TextSemiBold
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.Blue1
 import java.util.Locale
 
 @Composable
@@ -60,6 +62,8 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
     val vetRepository = remember { VetRepository() }
     var vetClinic by remember { mutableStateOf<VeterinaryClinic?>(null) }
     var vets by remember { mutableStateOf<List<Vet>?>(null) }
+    val context = LocalContext.current
+    var streetName by remember { mutableStateOf("Loading...") }
 
     LaunchedEffect(key1 = vetClinicId) {
         vetClinicRepository.getVeterinaryClinicById(vetClinicId) { clinic ->
@@ -73,12 +77,18 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
         }
     }
 
+    LaunchedEffect(vetClinic?.location) {
+        vetClinic?.location?.let { location ->
+            streetName = getStreetNameFromCoordinates(location, context)
+        }
+    }
+
     vetClinic?.let { veterinaryClinic ->
         Scaffold(
             topBar = {
-                TopBar(navController = navController, title = "Veterinary Clinic Details")
+                TopBar(navController = navController, title = "Veterinary Clinic")
             },
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier,
             content = { paddingValues ->
                 Column(
                     modifier = Modifier
@@ -94,11 +104,11 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
                     ClinicInfo(
                         phoneNumber = "987654321",
                         email = veterinaryClinic.name.lowercase(Locale.ROOT) + "@" + "gmail.com",
-                        operatingHours = veterinaryClinic.office_hours_start + " - " + veterinaryClinic.office_hours_end,
-                        location = veterinaryClinic.location
+                        operatingHours = " ${formatTime(veterinaryClinic.office_hours_start) + " - " + formatTime(veterinaryClinic.office_hours_end)}",
+                        location = streetName
                     )
 
-                    AboutUsSection(description = veterinaryClinic.description)
+                    AboutUsSection(description = capitalizeFirstLetter2(veterinaryClinic.description))
 
                     TextSemiBold(text = "Our Specialists")
 
@@ -107,8 +117,6 @@ fun OwnerClinicDetails(navController: NavHostController, vetClinicId: Int) {
                             VeterinaryCard(vet, navController)
                         }
                     }
-
-
                 }
             }
         )
@@ -125,15 +133,16 @@ fun ClinicNameAndRating(name: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = name,
+            text = capitalizeFirstLetter(name),
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Blue1
         )
         Row {
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = "Rating",
-                tint = Color.Yellow
+                tint = Color(0xFFFFB800)
             )
             Text(text = "4.5")
         }
@@ -147,7 +156,7 @@ fun ClinicInfo(phoneNumber: String, email: String, operatingHours: String, locat
     ) {
         InfoRow(icon = Icons.Filled.Phone, text = phoneNumber)
         InfoRow(icon = Icons.Filled.Email, text = email)
-        InfoRow(icon = Icons.Filled.WatchLater, text = "Operating Hours: $operatingHours")
+        InfoRow(icon = Icons.Filled.WatchLater, text = "Schedule: $operatingHours")
         InfoRow(icon = Icons.Filled.LocationOn, text = "Location: $location")
     }
 }
@@ -160,9 +169,15 @@ fun AboutUsSection(description:String) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         TextSemiBold(text = "About us:")
-        TextNormal(text = description, color = Color.White)
+        TextNormal(text = description, color = Color.Gray)
     }
 }
+
+fun capitalizeFirstLetter2(text: String): String {
+    return text.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+}
+
+
 
 @Composable
 fun InfoRow(icon: ImageVector?, text: String) {
@@ -173,7 +188,7 @@ fun InfoRow(icon: ImageVector?, text: String) {
         if (icon != null) {
             Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         }
-        TextNormal(text = text, color= Color.White)
+        TextNormal(text = text, color= Color.Gray)
     }
 }
 
@@ -182,7 +197,7 @@ fun InfoRow(icon: ImageVector?, text: String) {
 fun VeterinaryCard(vet: Vet, navController: NavHostController) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
+            containerColor = Color(0xFFF0F6FF),
         ),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
@@ -192,7 +207,7 @@ fun VeterinaryCard(vet: Vet, navController: NavHostController) {
             .clickable {
                 navController.navigate(Routes.OwnerVetProfile.createRoute(vet.id))
             }
-            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp))
+            .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp))
     ) {
         Column(
             modifier = Modifier
@@ -207,7 +222,7 @@ fun VeterinaryCard(vet: Vet, navController: NavHostController) {
                     .height(80.dp),
                 imageOptions = ImageOptions(contentScale = ContentScale.Crop)
             )
-            TextSemiBold(text = vet.name)
+            TextSemiBold(text = capitalizeFirstLetter(vet.name))
             //TextNormal(text = vet.name, color = Color.Black)
         }
     }

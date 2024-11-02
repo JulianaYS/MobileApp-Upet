@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,13 +25,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,36 +43,48 @@ import androidx.navigation.NavHostController
 import pe.edu.upc.upet.feature_petOwner.data.remote.SubscriptionType
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.screens.petowner.getOwner
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.capitalizeFirstLetter
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.getStreetNameFromCoordinates
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.ImagePicker
 import pe.edu.upc.upet.ui.shared.SuccessDialog
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.Blue1
+import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.utils.TokenManager
 
 @Composable
 fun OwnerProfile(navController: NavHostController) {
-    val petOwner = getOwner()?: return
-    val userEmail = TokenManager.getEmail()?: return
+    val petOwner = getOwner() ?: return
+    val userEmail = TokenManager.getEmail() ?: return
+    val context = LocalContext.current
+    var streetName by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(petOwner.location) {
+        streetName = getStreetNameFromCoordinates(petOwner.location, context)
+    }
 
     Scaffold(
         topBar = { TopBar(navController = navController, title = "My Profile") },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(start = BorderPadding, end = BorderPadding, bottom = BorderPadding)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(30.dp)
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
+            Spacer(modifier = Modifier.height(10.dp))
 
             ProfileHeader(petOwner.id, petOwner.imageUrl)
+
             UserInfo(petOwner.name, userEmail,
                 listOf(
                     InfoRowData(Icons.Default.Person4, "Phone", petOwner.numberPhone),
-                    InfoRowData(Icons.Default.Home, "Address", petOwner.location)
+                    InfoRowData(Icons.Default.Home, "Address", streetName)
                 )
             )
             val subscriptionRoute = if (petOwner.subscriptionType == SubscriptionType.BASIC) {
@@ -82,6 +100,7 @@ fun OwnerProfile(navController: NavHostController) {
                     navController.navigate(Routes.SignIn.route)
                 }
             )
+
         }
     }
 }
@@ -128,7 +147,7 @@ fun ProfileButtons(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(15.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         profileButtons.forEach { button ->
             CustomButton(button.text, button.icon, button.onClick)
@@ -149,11 +168,11 @@ fun UserInfo(
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = name,
+                text = capitalizeFirstLetter(name),
                 color = Color.Black,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.SemiBold
@@ -188,7 +207,7 @@ fun InfoRow(icon: ImageVector, label: String, value: String?) {
         Icon(
             imageVector = icon,
             contentDescription = "$label Icon",
-            tint = Color(0xFF3F51B5)
+                tint = Blue1
         )
         Text(
             text = "$label: ${value ?: ""

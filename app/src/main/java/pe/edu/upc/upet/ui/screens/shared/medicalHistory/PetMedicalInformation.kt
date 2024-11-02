@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,6 +40,8 @@ import pe.edu.upc.upet.feature_medicalHistory.data.remote.MedicalResultResponse
 import pe.edu.upc.upet.feature_medicalHistory.data.remote.SurgeryResponse
 import pe.edu.upc.upet.feature_medicalHistory.data.remote.VaccineResponse
 import pe.edu.upc.upet.feature_medicalHistory.data.repository.MedicalHistoryRepository
+import pe.edu.upc.upet.navigation.Routes
+import pe.edu.upc.upet.ui.screens.petowner.isOwnerAuthenticated
 import pe.edu.upc.upet.ui.shared.TopBar
 import pe.edu.upc.upet.ui.theme.Pink
 
@@ -74,6 +80,22 @@ fun PetMedicalInformation(navController: NavController, petId: Int) {
 
     Scaffold(
         topBar = { TopBar(navController, "Medical Information") },
+        floatingActionButton = {
+            if(isOwnerAuthenticated()){
+
+            } else {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate(Routes.AddReport.createRoute( petId))
+                    },
+                    contentColor = Color.White,
+                    containerColor = Pink,
+                ) {
+                    Icon(imageVector = Icons.Default.Add,
+                        contentDescription = "Add")
+                }
+            }
+        },
         content = { paddingValues ->
             if (isLoading) {
                 Box(

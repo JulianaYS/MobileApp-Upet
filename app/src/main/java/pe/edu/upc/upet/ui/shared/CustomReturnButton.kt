@@ -22,23 +22,17 @@ import pe.edu.upc.upet.ui.theme.BorderPadding
 
 @Composable
 fun CustomReturnButton(navController: NavController) {
-    Row(
+    IconButton(
+        onClick = { navController.popBackStack() },
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = BorderPadding)
+            .clip(RoundedCornerShape(15.dp))
+            .background(Pink)
     ) {
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier
-                .clip(RoundedCornerShape(15.dp))
-                .background(Pink)
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                "Back",
-                modifier = Modifier.fillMaxSize(1f),
-                tint = Blue1
-            )
-        }
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            "Back",
+            modifier = Modifier.fillMaxSize(1f),
+            tint = Color.White
+        )
     }
 }

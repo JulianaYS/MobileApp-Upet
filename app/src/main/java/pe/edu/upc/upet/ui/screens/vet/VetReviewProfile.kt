@@ -48,7 +48,6 @@ fun VetReviewProfile(navController: NavHostController, showFAB: Boolean = false)
         topBar = {
             TopBar(navController = navController, title = "Reviews")
         },
-        modifier = Modifier.padding(16.dp),
         floatingActionButton = {
             if(showFAB){
                 FloatingActionButton(

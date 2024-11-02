@@ -3,6 +3,9 @@ package pe.edu.upc.upet.ui.screens.vet
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +13,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
@@ -38,7 +43,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import pe.edu.upc.upet.feature_medicalHistory.data.remote.DiseaseRequest
 import pe.edu.upc.upet.feature_medicalHistory.data.remote.MedicalResultRequest
@@ -46,12 +54,15 @@ import pe.edu.upc.upet.feature_medicalHistory.data.remote.SurgeryRequest
 import pe.edu.upc.upet.feature_medicalHistory.data.remote.VaccineRequest
 import pe.edu.upc.upet.feature_medicalHistory.data.repository.MedicalHistoryRepository
 import pe.edu.upc.upet.navigation.Routes
+import pe.edu.upc.upet.ui.shared.AuthInputTextField
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.InputDate
 import pe.edu.upc.upet.ui.shared.SuccessDialog
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.UpetBackGroundPrimary
+import pe.edu.upc.upet.ui.theme.poppinsFamily
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -111,12 +122,12 @@ fun VetMedicalHistory(navController: NavController, petId: Int) {
         topBar = {
             TopBar(navController, "Veterinary Forms")
         },
-        modifier = Modifier.padding(16.dp)
+
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(10.dp)
+                .padding(start = BorderPadding, end = BorderPadding)
                 .verticalScroll(rememberScrollState())
         ) {
 
@@ -127,23 +138,30 @@ fun VetMedicalHistory(navController: NavController, petId: Int) {
                 onExpandChange = { isDiseaseExpanded = it }
             ) {
                 Column {
-                    InputDropdownField(
+                    /*InputDropdownField(
                         value = diseaseName,
                         onValueChange = { diseaseName = it },
                         label = "Name",
                         suggestions = commonDiseaseNames,
                         modifier = Modifier.fillMaxWidth()
-                    )
+                    )*/
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(diseaseName)
+                    }, placeholder = "Enter name", label = "Name")
+
                     InputDate(text = "Diagnosis Date") {
                         diseaseDiagnosisDate = it
                     }
-                    InputDropdownField(
+                    /*InputDropdownField(
                         value = diseaseSeverity,
                         onValueChange = { diseaseSeverity = it },
                         label = "Severity",
                         suggestions = commonSeverities,
                         modifier = Modifier.fillMaxWidth()
-                    )
+                    )*/
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(diseaseSeverity)
+                    }, placeholder = "Enter severity", label = "Severity")
                     CustomButton("Add Disease") {
                         if (medicalHistoryId != null) {
                             val diseaseRequest = DiseaseRequest(
@@ -175,7 +193,7 @@ fun VetMedicalHistory(navController: NavController, petId: Int) {
                     InputDate(text = "Result Date") {
                         resultDate = it
                     }
-                    OutlinedTextField(
+                    /*OutlinedTextField(
                         value = resultType,
                         onValueChange = { resultType = it },
                         label = { Text("Type") },
@@ -188,7 +206,15 @@ fun VetMedicalHistory(navController: NavController, petId: Int) {
                         label = { Text("Description") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                    )
+                    )*/
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(resultType)
+                    }, placeholder = "Enter type", label = "Type")
+
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(resultDescription)
+                    }, placeholder = "Enter description", label = "Description")
+
                     CustomButton("Add Result") {
                         if (medicalHistoryId != null) {
                             val medicalResultRequest = MedicalResultRequest(
@@ -220,13 +246,17 @@ fun VetMedicalHistory(navController: NavController, petId: Int) {
                     InputDate(text = "Surgery Date") {
                         surgeryDate = it
                     }
-                    OutlinedTextField(
+                    /*OutlinedTextField(
                         value = surgeryDescription,
                         onValueChange = { surgeryDescription = it },
                         label = { Text("Description") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                    )
+                    )*/
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(surgeryDescription)
+                    }, placeholder = "Enter description", label = "Description")
+
                     CustomButton("Add Surgery") {
                         if (medicalHistoryId != null) {
                             val surgeryRequest = SurgeryRequest(
@@ -254,17 +284,21 @@ fun VetMedicalHistory(navController: NavController, petId: Int) {
                 onExpandChange = { isVaccineExpanded = it }
             ) {
                 Column {
-                    OutlinedTextField(
+                    /*OutlinedTextField(
                         value = vaccineName,
                         onValueChange = { vaccineName = it },
                         label = { Text("Name") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                    )
+                    )*/
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(vaccineName)
+                    }, placeholder = "Enter name", label = "Name")
+
                     InputDate(text = "Vaccine Date") {
                         vaccineDate = it
                     }
-                    InputDropdownField(
+                    /*InputDropdownField(
                         value = vaccineType,
                         onValueChange = { vaccineType = it },
                         label = "Type",
@@ -284,7 +318,19 @@ fun VetMedicalHistory(navController: NavController, petId: Int) {
                         label = { Text("Location") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                    )
+                    )*/
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(vaccineType)
+                    }, placeholder = "Enter type", label = "Type")
+
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(vaccineDose)
+                    }, placeholder = "Enter dose", label = "Dose")
+
+                    AuthInputTextField(input = remember {
+                        mutableStateOf(vaccineType)
+                    }, placeholder = "Enter location", label = "Location")
+
                     CustomButton("Add Vaccine") {
                         if (medicalHistoryId != null) {
                             val vaccineRequest = VaccineRequest(
@@ -385,14 +431,22 @@ fun InputDropdownField(
                 }
             },
             label = { Text(label) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(height = 56.dp, width = 300.dp)
+                .padding(bottom = 10.dp, start = BorderPadding, end = BorderPadding)
+                .border(BorderStroke(2.dp, Pink), shape = RoundedCornerShape(10.dp))
+                .background(Color.White, shape = RoundedCornerShape(10.dp))
+            ,
             singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Gray,
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = ContentAlpha.disabled)
-            )
+
+            textStyle = TextStyle(
+                color = if (value.isNotEmpty()) Color.Black else Color.Gray,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = poppinsFamily
+            ),
+
         )
         DropdownMenu(
             expanded = expanded && filteredSuggestions.isNotEmpty(),

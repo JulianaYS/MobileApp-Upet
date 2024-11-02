@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import com.skydoves.landscapist.glide.GlideImage
 import pe.edu.upc.upet.feature_pet.domain.Pet
 import pe.edu.upc.upet.navigation.Routes
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.capitalizeFirstLetter
 import java.time.LocalDate
 import java.time.Period
 
@@ -35,7 +36,7 @@ import java.time.Period
 fun PetCard(navController: NavController, pet: Pet) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
+            containerColor = Color(0xFFF0F6FF),
         ),
         modifier = Modifier
             .fillMaxWidth(),
@@ -67,7 +68,7 @@ fun PetCard(navController: NavController, pet: Pet) {
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
-                        text = pet.name,
+                        text = capitalizeFirstLetter(pet.name),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = Color.Black
                     )
@@ -90,14 +91,14 @@ fun PetCard(navController: NavController, pet: Pet) {
                     Button(
                         onClick = { navController.navigate(Routes.PetDetails.createRoute(pet.id))},
                         colors = ButtonDefaults.buttonColors(Color(0xFFEB5569)),
-                        shape = RoundedCornerShape(6.dp)
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text("View")
                     }
                     Button(
                         onClick = { navController.navigate(Routes.EditPetDetail.createRoute(pet.id))},
                         colors = ButtonDefaults.buttonColors(Color(0xFFEB5569)),
-                        shape = RoundedCornerShape(6.dp)
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text("Edit")
                     }

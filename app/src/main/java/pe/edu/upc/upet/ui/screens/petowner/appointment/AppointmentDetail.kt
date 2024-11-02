@@ -53,10 +53,13 @@ import pe.edu.upc.upet.feature_vet.data.repository.VetRepository
 import pe.edu.upc.upet.feature_vet.domain.Vet
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.screens.petowner.getRole
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.capitalizeFirstLetter
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.TextSubtitle2
 import pe.edu.upc.upet.ui.shared.TopBar
 import pe.edu.upc.upet.ui.shared.getAge
+import pe.edu.upc.upet.ui.theme.Blue1
+import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.PinkStrong
 import pe.edu.upc.upet.ui.theme.poppinsFamily
@@ -111,26 +114,16 @@ fun AppointmentDetail(navController: NavController, appointmentId: Int) {
         },
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .padding(BorderPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Column {
 
-                }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             TextSubtitle2("Schedule Appointment")
 
@@ -151,6 +144,8 @@ fun AppointmentDetail(navController: NavController, appointmentId: Int) {
                 TextSubtitle2("Owner Information")
 
                 OwnerInformation(ownerPet!!, navController)
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 CustomButton(text = "Add report") {
                     navController.navigate(Routes.AddReport.createRoute(pet!!.id))
@@ -174,7 +169,7 @@ fun InformationCard(
 ) {
     Card(
         modifier = Modifier
-            .padding(8.dp)
+
             .fillMaxWidth()
             .clickable(onClick = {
                 navController.navigate(Routes.OwnerVetProfile.createRoute(id))
@@ -207,7 +202,7 @@ fun InformationCard(
             )
             Column {
                 Text(
-                    text = name,
+                    text = capitalizeFirstLetter(name),
                     style = TextStyle(
                         color = Color.Black,
                         fontSize = 18.sp,
@@ -241,7 +236,9 @@ fun OwnerInformation(ownerPet: PetOwner, navController: NavController) {
 
 @Composable
 fun VetInformation(vet: Vet, navController: NavController) {
-    InformationCard(vet.imageUrl, "Dr. ${vet.name}", "Specialty: Veterinary", vet.id, navController)
+    InformationCard(vet.imageUrl,
+        "Dr. ${vet.name}",
+        "Specialty: Veterinary", vet.id, navController)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -267,7 +264,7 @@ fun AppointmentScheduleInfo(day: String, startHour: String, endHour: String) {
             Icon(
                 imageVector = Icons.Default.CalendarToday,
                 contentDescription = "Date",
-                tint = Color.White
+                tint = Blue1
             )
             Text(text = formattedDay, color = Color(0xFFFF6262))
         }
@@ -278,7 +275,7 @@ fun AppointmentScheduleInfo(day: String, startHour: String, endHour: String) {
             Icon(
                 imageVector = Icons.Default.AccessTime,
                 contentDescription = "Time",
-                tint = Color.White
+                tint = Blue1
             )
             Text(text = time, color = Color(0xFFFF6262))
         }
@@ -289,14 +286,14 @@ fun AppointmentScheduleInfo(day: String, startHour: String, endHour: String) {
 @Composable
 fun PatientInformation(pet: Pet, appointment: Appointment, navController: NavController) {
     Row(
-        modifier = Modifier.padding(horizontal = 8.dp),
+        modifier = Modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "Problem: ",
             style = TextStyle(
-                color = Color.White,
+                color = Color.Black,
                 fontSize = 18.sp,
                 fontFamily = poppinsFamily
             )
@@ -314,7 +311,7 @@ fun PatientInformation(pet: Pet, appointment: Appointment, navController: NavCon
 
     Card(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(top = 8.dp)
             .fillMaxWidth()
             .clickable(onClick = {
                 navController.navigate(Routes.PetDetails.createRoute(pet.id))
@@ -354,7 +351,7 @@ fun PatientInformation(pet: Pet, appointment: Appointment, navController: NavCon
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = " ${pet.name}",
+                        text = " ${capitalizeFirstLetter(pet.name)}",
                         style = TextStyle(
                             color = Color.Black,
                             fontSize = 18.sp,
@@ -363,7 +360,7 @@ fun PatientInformation(pet: Pet, appointment: Appointment, navController: NavCon
                         )
                     )
                     Text(
-                        text = "-  ${getAge(pet.birthdate)}",
+                        text = "-     ${getAge(pet.birthdate)}",
                         style = TextStyle(
                             color = PinkStrong,
                             fontSize = 16.sp,
@@ -372,7 +369,7 @@ fun PatientInformation(pet: Pet, appointment: Appointment, navController: NavCon
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = pet.breed,
+                    text = " Breed: ${capitalizeFirstLetter(pet.breed)}",
                     style = TextStyle(
                         color = PinkStrong,
                         fontSize = 16.sp,

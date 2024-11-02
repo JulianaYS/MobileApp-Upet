@@ -7,8 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -27,9 +26,9 @@ import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.DropdownMenuBox
 import pe.edu.upc.upet.ui.shared.ExpandableTextField
-import pe.edu.upc.upet.ui.shared.IconAndTextHeader
 import pe.edu.upc.upet.ui.shared.SuccessDialog
 import pe.edu.upc.upet.ui.shared.TextSubtitle2
+import pe.edu.upc.upet.ui.shared.TopBar
 import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.utils.TokenManager
 
@@ -59,29 +58,54 @@ fun PetDetailsAppointment(navController: NavController, vetId: Int, selectedDate
             buttonText = "OK")
     }
 
-    Column(
+    Scaffold(
+        topBar = {
+            TopBar(
+                title = "Pet Details", navController = navController
+            )
+        },
         modifier = Modifier
-            .padding()
             .fillMaxSize()
-            .padding(top = 10.dp, start = BorderPadding, end = BorderPadding),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column (
-            verticalArrangement = Arrangement.Top
-        ){
-            IconAndTextHeader(onBackClick = { navController.popBackStack() }, text = "Pet details", icon = Icons.AutoMirrored.Filled.ArrowBack)
-            TextSubtitle2(text = "Select my pet")
-            DropdownMenuBox(options = petOptions.map { it.name }, selectedOption = selectedPet, paddingStart = 0, paddingEnd = 0, fontSize = 16)
-            TextSubtitle2(text = "Pet's problem")
-            ExpandableTextField(input = textProblem, placeholder = "Enter your pet's problem")
+    ) { paddingValues ->
+
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .padding(top = 10.dp, start = BorderPadding, end = BorderPadding),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Top
+            ) {
+
+                TextSubtitle2(text = "Select my pet")
+                DropdownMenuBox(
+                    options = petOptions.map { it.name },
+                    selectedOption = selectedPet,
+                    paddingStart = 0,
+                    paddingEnd = 0,
+                    fontSize = 16
+                )
+                TextSubtitle2(text = "Pet's problem")
+                ExpandableTextField(input = textProblem, placeholder = "Enter your pet's problem")
+            }
+
+            CustomButton(text = "Book now", onClick = {
+
+                createAppointment(
+                    vetId,
+                    selectedDate,
+                    selectedTime,
+                    textProblem.value,
+                    petOptions,
+                    selectedPet.value,
+                    showSuccessDialog
+                )
+            })
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
-
-        CustomButton(text = "Book now", onClick = {
-
-            createAppointment(vetId, selectedDate, selectedTime, textProblem.value, petOptions, selectedPet.value, showSuccessDialog)
-        })
-
-        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 

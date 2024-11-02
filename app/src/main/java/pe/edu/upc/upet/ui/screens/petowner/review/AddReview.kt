@@ -31,6 +31,7 @@ import pe.edu.upc.upet.ui.shared.AuthButton
 import pe.edu.upc.upet.ui.shared.AuthInputTextField
 import pe.edu.upc.upet.ui.shared.CustomReturnButton
 import pe.edu.upc.upet.ui.shared.TextFieldType
+import pe.edu.upc.upet.ui.shared.TopBar
 import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.poppinsFamily
 import pe.edu.upc.upet.utils.TokenManager
@@ -49,36 +50,22 @@ fun AddReview(navController: NavController, vetId: Int) {
 
     var snackbarMessage by remember { mutableStateOf("") }
 
-    Scaffold(modifier = Modifier.padding(16.dp)) { paddingValues ->
+    Scaffold(modifier = Modifier,
+        topBar = {
+            TopBar(navController = navController, title = "Add Review")
+        }
+    ) { paddingValues ->
         LazyColumn {
             item {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
+                        .padding(paddingValues)
+                        .padding(top = BorderPadding
+                        ),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFF0B1C3F))
-                            .padding(top = 10.dp, start = BorderPadding, end = BorderPadding),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        CustomReturnButton(navController = navController)
-                        Text(
-                            text = "Add review",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 10.dp, start = 20.dp),
-                            style = TextStyle(
-                                color = Color.White,
-                                fontSize = 20.sp,
-                                fontFamily = poppinsFamily,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                        )
-                    }
+
                     AuthInputTextField(
                         input = reviewContent,
                         placeholder = "Enter your review",

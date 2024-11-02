@@ -39,7 +39,6 @@ import pe.edu.upc.upet.utils.TokenManager
 @Composable
 fun OwnerEditProfile(navController: NavHostController) {
     val tokenData = TokenManager.getUserIdAndRoleFromToken()
-
     if (tokenData == null) {
         navController.navigate(Routes.SignIn.route)
         return
@@ -78,7 +77,7 @@ fun OwnerEditProfile(navController: NavHostController) {
         topBar = {
             TopBar(navController = navController, title = "Edit Profile")
         },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
     ) { paddingValues ->
         LazyColumn(
             contentPadding = paddingValues,

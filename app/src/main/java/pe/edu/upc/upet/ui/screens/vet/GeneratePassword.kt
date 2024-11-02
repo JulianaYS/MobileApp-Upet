@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import pe.edu.upc.upet.feature_vetClinic.data.repository.VeterinaryClinicRepository
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.TopBar
+import pe.edu.upc.upet.ui.theme.BorderPadding
 
 @Composable
 fun GeneratePassword(navController: NavController, vetClinicId: Int) {
@@ -41,7 +42,7 @@ fun GeneratePassword(navController: NavController, vetClinicId: Int) {
 
     Scaffold(
         topBar = { TopBar(navController = navController, title = "Generate Password") },
-        modifier = Modifier.padding(16.dp)
+
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -54,7 +55,8 @@ fun GeneratePassword(navController: NavController, vetClinicId: Int) {
         ) {
             Text(
                 text = "This password allows another veterinarian to join the current veterinary Clinic in the application.",
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Start,
+                modifier = Modifier.padding(top= BorderPadding)
 
             )
 

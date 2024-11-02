@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -40,7 +39,7 @@ fun OwnerClinicMap(navController: NavController) {
     Scaffold(
         topBar = {
             TopBar(navController = navController,
-                title = "Nearby Veterinary Clinics")
+                title = "Nearby Vet Clinics")
         },
         modifier = Modifier
     ) {paddingValues->

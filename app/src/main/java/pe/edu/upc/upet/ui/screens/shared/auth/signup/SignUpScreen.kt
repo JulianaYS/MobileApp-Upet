@@ -2,7 +2,6 @@ package pe.edu.upc.upet.ui.screens.shared.auth.signup
 
 import android.util.Log
 import android.util.Patterns
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +14,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,7 +32,6 @@ import pe.edu.upc.upet.ui.shared.RadioButtonsOptions
 import pe.edu.upc.upet.ui.shared.TextFieldType
 import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
-import pe.edu.upc.upet.ui.theme.UpetBackGroundPrimary
 import pe.edu.upc.upet.ui.theme.poppinsFamily
 
 @Composable
@@ -71,7 +68,6 @@ fun SignUpScreen( navigateTo: (String) -> Unit ){
                     modifier = Modifier
                         .padding(paddingValues)
                         .fillMaxSize()
-                        .background(UpetBackGroundPrimary)
                 ) {
                     AuthHeader(texto = "Register")
                     AuthInputTextField(input = fullName, placeholder = "Enter your full name", label ="Full Name" )

@@ -40,6 +40,7 @@ import pe.edu.upc.upet.feature_vetClinic.data.repository.VeterinaryClinicReposit
 import pe.edu.upc.upet.feature_vetClinic.domain.VeterinaryClinic
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.screens.petowner.pet.ImageRectangle
+import pe.edu.upc.upet.ui.screens.petowner.vetclinic.capitalizeFirstLetter
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.TextSemiBold
 import pe.edu.upc.upet.ui.shared.TopBar
@@ -82,7 +83,9 @@ fun OwnerVetProfile(vetId: Int, navController: NavController){
     }*/
 
     vet?.let { vett ->
-        Scaffold(topBar = { TopBar(navController = navController, title = "Vet Profile" ) }) { paddingValues ->
+        Scaffold(topBar = {
+            TopBar(navController = navController, title = "Vet Profile" )
+        }) { paddingValues ->
             LazyColumn {
                 item {
                     Column(modifier = Modifier
@@ -107,7 +110,7 @@ fun OwnerVetProfile(vetId: Int, navController: NavController){
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ){
                                 Text(
-                                    text = "Dr. " + vett.name,
+                                    text = "Dr. " + capitalizeFirstLetter(vett.name),
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 24.sp,
                                     color = MaterialTheme.colorScheme.primary
@@ -116,11 +119,11 @@ fun OwnerVetProfile(vetId: Int, navController: NavController){
 
                                 TextSemiBold(text = "Clinic Veterinary", color = Blue1)
 
-                                vetClinic?.let { Text(text = it.name) }
+                                vetClinic?.let { Text(text = capitalizeFirstLetter(it.name), color = Color.Gray) }
 
                                 TextSemiBold(text = "About", color = Blue1)
 
-                                Text(text = vett.description?:"")
+                                Text(text = vett.description?:"",  color = Color.Gray)
 
                                 TextSemiBold(text = "Experience", color = Blue1)
 

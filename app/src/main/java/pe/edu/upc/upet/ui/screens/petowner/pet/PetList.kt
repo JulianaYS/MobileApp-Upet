@@ -54,7 +54,7 @@ fun PetList(navController: NavHostController) {
         topBar = {
             TopBar(navController = navController, title = "My Pets")
         },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
 
     ) {paddingValues->
         LazyColumn(modifier = Modifier.padding(paddingValues)) {
