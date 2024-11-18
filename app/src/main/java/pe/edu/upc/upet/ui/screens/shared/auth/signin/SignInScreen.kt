@@ -67,12 +67,7 @@ fun SignInScreen(authRepository: AuthRepository = AuthRepository(), navigateTo: 
                         label = "Password",
                         type= TextFieldType.Password
                     )
-                    if (email.value.isEmpty()) {
-                        email.value = "mario@gmail.com"
-                    }
-                    if (password.value.isEmpty()) {
-                        password.value = "mario"
-                    }
+
                     AuthTextButton("Forgot Password?", arrangement = Arrangement.End,
                         onClickClickableText = {
                             navigateTo(Routes.SendEmail.route)

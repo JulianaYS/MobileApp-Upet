@@ -44,7 +44,7 @@ fun CustomButton2(
     Button(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = color) // Corregir el uso de buttonColors
+        colors = ButtonDefaults.buttonColors(containerColor = color)
     ) {
         if (icon != null) {
             Icon(imageVector = icon, contentDescription = "$text Icon")

@@ -1,6 +1,13 @@
 package pe.edu.upc.upet.ui.screens.petowner.pet
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -23,6 +28,7 @@ import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.filled.TagFaces
 import androidx.compose.material.icons.outlined.Balance
+import androidx.compose.material.icons.outlined.BatteryChargingFull
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Pets
@@ -43,6 +49,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,33 +68,87 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import pe.edu.upc.upet.feature_pet.data.remote.GenderEnum
 import pe.edu.upc.upet.feature_pet.data.repository.PetRepository
 import pe.edu.upc.upet.feature_pet.domain.Pet
+import pe.edu.upc.upet.feature_smartCollar.data.repository.SmartCollarRepository
+import pe.edu.upc.upet.feature_smartCollar.domain.SmartCollar
 import pe.edu.upc.upet.navigation.Routes
 import pe.edu.upc.upet.ui.screens.petowner.getRole
-import pe.edu.upc.upet.ui.screens.petowner.isOwnerAuthenticated
 import pe.edu.upc.upet.ui.shared.CustomButton
 import pe.edu.upc.upet.ui.shared.CustomButton2
 import pe.edu.upc.upet.ui.theme.Blue1
 import pe.edu.upc.upet.ui.theme.BorderPadding
 import pe.edu.upc.upet.ui.theme.Pink
 import pe.edu.upc.upet.ui.theme.poppinsFamily
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.delay
+import kotlin.coroutines.resume
 
 @Composable
 fun PetDetail(navController: NavHostController, petId: Int) {
     var pet by remember { mutableStateOf<Pet?>(null) }
     var isTracking by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     var iconImage by remember { mutableStateOf(Icons.Filled.TagFaces) }
     var iconColor by remember { mutableStateOf(Color.Red) }
+    var collarId by remember { mutableStateOf<Int?>(null) }
+    var showMapDialog by remember { mutableStateOf(false) }
+    val temperature = remember { mutableStateOf("0.0 °C") }
+    val lpm = remember { mutableStateOf("0 lpm") }
+    val battery = remember { mutableStateOf("0 %") }
+    val gpsLatitude = remember { mutableStateOf<Double?>(null) }
+    val gpsLongitude = remember { mutableStateOf<Double?>(null) }
 
-    PetRepository().getPetById(petId){
+    suspend fun getAllSmartCollarsSuspend(): List<SmartCollar> {
+        return suspendCancellableCoroutine { continuation ->
+            SmartCollarRepository().getAllSmartCollars { smartCollars ->
+                continuation.resume(smartCollars)
+            }
+        }
+    }
+
+    suspend fun getCollarIdByProductCode(productCode: String): Int? {
+        val collars = getAllSmartCollarsSuspend()
+        return collars.firstOrNull { it.serial_number == productCode }?.id
+    }
+
+    fun fetchRealTimeData(petId: Int, onUpdate: (SmartCollar?) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            while (true) {
+                SmartCollarRepository().getSmartCollarsByPetId(petId) { smartCollar ->
+                    onUpdate(smartCollar)
+                    isTracking = smartCollar != null
+                }
+
+                delay(1000)
+            }
+        }
+    }
+
+
+    PetRepository().getPetById(petId) {
         pet = it
     }
 
     val petValue = pet ?: return
+
     data class PetInfo(val title: String, val icon: ImageVector, val content: String)
+
     fun petResponseToPetInfoList(petResponse: Pet): List<PetInfo> {
         return listOf(
             PetInfo("Breed", Icons.Outlined.Pets, petResponse.breed),
@@ -95,13 +157,41 @@ fun PetDetail(navController: NavHostController, petId: Int) {
             PetInfo("Birthdate", Icons.Outlined.Timer, petResponse.birthdate),
         )
     }
+
     val petInfoList = petResponseToPetInfoList(petValue)
 
-    Scaffold(modifier = Modifier,
+
+    LaunchedEffect(petValue.id) {
+        fetchRealTimeData(petValue.id) { iotData ->
+            if (iotData != null) {
+                temperature.value = "${iotData.temperature} °C"
+            }
+            if (iotData != null) {
+                lpm.value = "${iotData.lpm} lpm"
+            }
+            if (iotData != null) {
+                battery.value = "${iotData.battery} %"
+            }
+            if (iotData != null) {
+                gpsLatitude.value = iotData.location.latitude
+            }
+            if (iotData != null) {
+                gpsLongitude.value = iotData.location.latitude
+            }
+        }
+    }
+
+
+    Scaffold(
+        modifier = Modifier,
         topBar = {
-            TopBarPet(navController = navController, title = petValue.name, gender= petValue.gender)
+            TopBarPet(
+                navController = navController,
+                title = petValue.name,
+                gender = petValue.gender
+            )
         },
-        ) { paddingValues ->
+    ) { paddingValues ->
         LazyColumn {
             item {
                 Column(
@@ -112,29 +202,6 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                         .background(Color.White),
                     verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
-                    /*Row (modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween){
-                        CustomReturnButton(navController = navController)
-                        Text(
-                            text = petValue.name,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 10.sp,
-                            color = Color.Black,
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                        )
-
-                        IconButton(
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                            onClick = {  }) {
-                            Icon(
-                                imageVector = if(petValue.gender == GenderEnum.Male) Icons.Filled.Male else Icons.Filled.Female,
-                                contentDescription = petValue.gender.toString()
-                            )
-                        }
-                    }*/
-
-                    println("Gender: ${petValue.gender}")
                     ImageRectangle(petValue.image_url)
 
                     Box(
@@ -143,8 +210,8 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                             .fillMaxWidth()
                             .clip(shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                             .background(Color(0xFFF0F6FF))
-                    ){
-                        Column (modifier = Modifier.padding(15.dp, 15.dp)) {
+                    ) {
+                        Column(modifier = Modifier.padding(15.dp, 15.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
@@ -163,7 +230,7 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 ) {
                                     Icon(
                                         imageVector = iconImage,
-                                        "TagFaces",
+                                        contentDescription = "TagFaces",
                                         tint = iconColor
                                     )
                                 }
@@ -172,10 +239,11 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start=10.dp, bottom = BorderPadding)
+                                    .padding(start = 10.dp, bottom = BorderPadding)
                             ) {
                                 petInfoList.forEach { petInfo ->
-                                    val content = if (petInfo.title == "Weight") "${petInfo.content} k." else petInfo.content
+                                    val content =
+                                        if (petInfo.title == "Weight") "${petInfo.content} k." else petInfo.content
                                     PetInformationCard(petInfo.title, petInfo.icon, content)
                                 }
                             }
@@ -187,14 +255,48 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 Column(
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    IoTInformationCard(title = "Temperature", icon = Icons.Outlined.Thermostat, content = "37.5 °C")
-                                    IoTInformationCard(title = "LPM", icon = Icons.Outlined.Favorite, content = "75 lpm")
+                                    IoTInformationCard(
+                                        title = "Temperature",
+                                        icon = Icons.Outlined.Thermostat,
+                                        content = temperature.value
+                                    )
+                                    IoTInformationCard(
+                                        title = "LPM",
+                                        icon = Icons.Outlined.Favorite,
+                                        content = lpm.value
+                                    )
                                 }
                                 Column(
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    IoTInformationCard(title = "RPM", icon = Icons.Outlined.Favorite, content = "40 rpm")
-                                    IoTInformationCard(title = "GPS", icon = Icons.Outlined.Map, content = "75 lpm")
+                                    IoTInformationCard(
+                                        title = "Batery",
+                                        icon = Icons.Outlined.BatteryChargingFull,
+                                        content = battery.value
+                                    )
+                                    IoTInformationCard(
+                                        title = "GPS (Click Me)",
+                                        icon = Icons.Outlined.Map,
+                                        content = if (gpsLatitude.value != null && gpsLongitude.value != null) {
+                                            "${gpsLatitude.value}, ${gpsLongitude.value}"
+                                        } else {
+                                            "No disponible"
+                                        },
+                                        onClick = {
+                                            if (gpsLatitude.value != null && gpsLongitude.value != null) {
+                                                showMapDialog = true
+                                            } else {
+                                                Toast.makeText(context, "Ubicación no disponible", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    )
+                                    if (showMapDialog) {
+                                        MapDialog(
+                                            onDismiss = { showMapDialog = false },
+                                            latitude = gpsLatitude.value ?: 0.0,
+                                            longitude = gpsLongitude.value ?: 0.0
+                                        )
+                                    }
                                 }
                             }
 
@@ -204,34 +306,85 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 fontSize = 24.sp,
                                 color = Color.Black,
                                 modifier = Modifier
-                                    .padding(top =10.dp, bottom = 10.dp)
+                                    .padding(top = 10.dp, bottom = 10.dp)
                             )
 
                             if (getRole() == "Vet") {
                                 CustomButton(text = "Medical History") {
-                                    navController.navigate(Routes.petMedicalHistory.createRoute(petValue.id))
+                                    navController.navigate(
+                                        Routes.petMedicalHistory.createRoute(
+                                            petValue.id
+                                        )
+                                    )
                                 }
-
                             } else {
                                 CustomButton2(
                                     text = if (isTracking) "Stop tracking" else "Start tracking",
+                                    color = if (isTracking) Color.Red else Blue1,
                                     onClick = {
                                         if (isTracking) {
-                                            isTracking = false
-                                            iconColor = Color.Red
-                                            iconImage = Icons.Filled.TagFaces
+                                            collarId?.let { collarId ->
+                                                CoroutineScope(Dispatchers.IO).launch {
+                                                    SmartCollarRepository().changePetAssociation(
+                                                        collarId,
+                                                        null
+                                                    ) { success ->
+                                                        if (success) {
+                                                            isTracking = false
+                                                            iconColor = Color.Red
+                                                            iconImage = Icons.Filled.TagFaces
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         } else {
                                             showDialog = true
                                         }
-                                    })
+                                    }
+                                )
                                 if (showDialog) {
                                     TrackingDialog(
                                         onDismiss = { showDialog = false },
-                                        onAccept = {
-                                            isTracking = true
-                                            showDialog = false
-                                            iconColor = Color(0xFF09D809)
-                                            iconImage = Icons.Outlined.TagFaces
+                                        onAccept = { code ->
+                                            if (code.isNotBlank()) {
+                                                CoroutineScope(Dispatchers.IO).launch {
+                                                    collarId =
+                                                        getCollarIdByProductCode(code)
+                                                    if (collarId != null) {
+                                                        SmartCollarRepository().changePetAssociation(
+                                                            collarId!!,
+                                                            petId
+                                                        ) { success ->
+                                                            if (success) {
+                                                                isTracking = true
+                                                                iconColor = Color(0xFF09D809)
+                                                                iconImage = Icons.Outlined.TagFaces
+                                                                showDialog =
+                                                                    false
+                                                            } else {
+                                                                isTracking = false
+                                                                iconColor = Color.Red
+                                                                iconImage = Icons.Filled.TagFaces
+                                                            }
+                                                        }
+                                                    } else {
+                                                        withContext(Dispatchers.Main) {
+                                                            showDialog = false
+                                                            Toast.makeText(
+                                                                context,
+                                                                "No se encontró el collar con ese código",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Por favor, ingrese un código válido",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
                                         }
                                     )
                                 }
@@ -243,9 +396,7 @@ fun PetDetail(navController: NavHostController, petId: Int) {
                                 CustomButton(text = "Add Medical Information") {
                                     navController.navigate(Routes.AddReport.createRoute(petValue.id))
                                 }
-
                             }
-
                         }
                     }
                 }
@@ -254,8 +405,12 @@ fun PetDetail(navController: NavHostController, petId: Int) {
     }
 }
 
+
 @Composable
-fun TrackingDialog(onDismiss: () -> Unit, onAccept: () -> Unit) {
+fun TrackingDialog(
+    onDismiss: () -> Unit,
+    onAccept: (String) -> Unit,
+) {
     var code by remember { mutableStateOf("") }
 
     AlertDialog(
@@ -271,7 +426,11 @@ fun TrackingDialog(onDismiss: () -> Unit, onAccept: () -> Unit) {
             }
         },
         confirmButton = {
-            Button(onClick = onAccept) {
+            Button(
+                onClick = {
+                    onAccept(code)
+                }
+            ) {
                 Text("Accept")
             }
         },
@@ -283,20 +442,30 @@ fun TrackingDialog(onDismiss: () -> Unit, onAccept: () -> Unit) {
     )
 }
 
+
 @Composable
-fun IoTInformationCard(title: String, icon: ImageVector, content: String) {
+fun IoTInformationCard(
+    title: String,
+    icon: ImageVector,
+    content: String,
+    onClick: (() -> Unit)? = null
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .width(180.dp)
             .height(100.dp)
-            .padding(6.dp),
+            .padding(6.dp)
+            .clickable(enabled = onClick != null) {
+                onClick?.invoke()
+            },
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFDAF1DB),
             contentColor = Color(0xFF0A2540)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-    ) {
+
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -312,7 +481,7 @@ fun IoTInformationCard(title: String, icon: ImageVector, content: String) {
         }
         Text(
             text = content,
-            fontSize = 22.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .padding(vertical = 4.dp)
@@ -332,14 +501,13 @@ fun ImageRectangle(imageUrl: String) {
             modifier = Modifier
                 .fillMaxWidth()
                 .size(200.dp)
-                .clip(shape = RoundedCornerShape(20.dp))
-            ,
+                .clip(shape = RoundedCornerShape(20.dp)),
             imageModel = { imageUrl })
     }
 }
 
 @Composable
-fun PetInformationCard(title:String, icon: ImageVector, content:String){
+fun PetInformationCard(title: String, icon: ImageVector, content: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -415,7 +583,7 @@ fun PetInformationCard(title:String, icon: ImageVector, content:String){
 }*/
 
 @Composable
-fun MedicalHistoryCard(title: String, date: String, description: String,icon: ImageVector) {
+fun MedicalHistoryCard(title: String, date: String, description: String, icon: ImageVector) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -542,4 +710,67 @@ fun CustomReturnButton1(navController: NavController) {
             tint = Color.White
         )
     }
+}
+
+@Composable
+fun MapDialog(
+    onDismiss: () -> Unit,
+    latitude: Double,
+    longitude: Double
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Ubicación en el mapa") },
+        text = {
+            Box(
+                modifier = Modifier
+                    .height(300.dp)
+                    .fillMaxWidth()
+            ) {
+                GoogleMapView(latitude = latitude, longitude = longitude)
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Cerrar")
+            }
+        }
+    )
+}
+
+@Composable
+fun GoogleMapView(latitude: Double, longitude: Double) {
+    val context = LocalContext.current
+    val mapView = rememberMapViewWithLifecycle(context)
+
+    AndroidView(
+        factory = { mapView },
+        modifier = Modifier.fillMaxSize()
+    ) { mapView ->
+        mapView.getMapAsync { googleMap ->
+            googleMap.uiSettings.isZoomControlsEnabled = true
+            val location = LatLng(latitude, longitude)
+            googleMap.addMarker(MarkerOptions().position(location).title("Ubicación actual"))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
+        }
+    }
+}
+
+@Composable
+fun rememberMapViewWithLifecycle(context: Context): MapView {
+    val mapView = remember { MapView(context) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val lifecycleObserver = object : DefaultLifecycleObserver {
+            override fun onCreate(owner: LifecycleOwner) = mapView.onCreate(null)
+            override fun onStart(owner: LifecycleOwner) = mapView.onStart()
+            override fun onResume(owner: LifecycleOwner) = mapView.onResume()
+            override fun onPause(owner: LifecycleOwner) = mapView.onPause()
+            override fun onStop(owner: LifecycleOwner) = mapView.onStop()
+            override fun onDestroy(owner: LifecycleOwner) = mapView.onDestroy()
+        }
+        lifecycle.addObserver(lifecycleObserver)
+        onDispose { lifecycle.removeObserver(lifecycleObserver) }
+    }
+    return mapView
 }
